@@ -49,6 +49,14 @@ type out struct {
 	// out  map[string]outStruct
 }
 
+func init() {
+	temp := utils.Must(template.New(pkgName).Parse(tpl))
+	temp = utils.Must(temp.New(getterName).Parse(getterTpl))
+	temp = utils.Must(temp.New(setterName).Parse(setterTpl))
+	temp = utils.Must(temp.New(importName).Parse(imprtTpl))
+	oIns.temp = temp
+}
+
 func (o *out) Output(g *GsProcessor) map[string][]byte {
 	ret := map[string][]byte{}
 	groupParsed := utils.GroupBy(g.Parsed, func(t core.Annotated) string {
@@ -171,83 +179,6 @@ func ExecuteTemplate(tpl *template.Template, data any) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-// func (os *outStruct) Out(formatter *template.Template) []byte {
-// 	ret := []byte{}
-// 	pkgTpl := formatter.Lookup(pkgName)
-// 	if pkgTpl != nil {
-// 		ret = append(ret, utils.Must(ExecuteTemplate(pkgTpl, os))...)
-// 	} else {
-// 		return nil
-// 	}
-//
-// 	if len(os.Import) > 0 {
-// 		impTpl := formatter.Lookup(importName)
-// 		if impTpl != nil {
-// 			ret = append(ret, utils.Must(ExecuteTemplate(impTpl, os))...)
-// 		}
-// 	}
-//
-// 	if len(os.Fields) > 0 {
-// 		setterTpl := formatter.Lookup(setterName)
-// 		getterTpl := formatter.Lookup(getterName)
-// 		for _, f := range os.Fields {
-// 			for _, ff := range f.field {
-// 				if ff.IsGetter {
-// 					ret = append(ret, utils.Must(ExecuteTemplate(getterTpl, ff))...)
-// 				}
-// 				if ff.IsSetter {
-// 					ret = append(ret, utils.Must(ExecuteTemplate(setterTpl, ff))...)
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return ret
-// }
-
-func init() {
-	temp := utils.Must(template.New(pkgName).Parse(tpl))
-	temp = utils.Must(temp.New(getterName).Parse(getterTpl))
-	temp = utils.Must(temp.New(setterName).Parse(setterTpl))
-	temp = utils.Must(temp.New(importName).Parse(imprtTpl))
-	oIns.temp = temp
-}
-
 func (o *out) Out() map[string][]byte {
 	return o.Output(o.g)
-	// for file, outStruct := range o.out {
-	// 	fnames := strings.Split(file, ".")
-	// 	utils.InsertInPos(&fnames, "gen", int64(len(fnames)-1))
-	// 	ret[strings.Join(fnames, ".")] = outStruct.Out(o.temp)
-	// }
 }
-
-// func (o *out) Process(gs *GsProcessor) {
-// 	for _, v := range gs.Targets {
-// 		fname := v.FullFileName()
-// 		outS, ok := o.out[fname]
-// 		if !ok {
-// 			os := outStruct{
-// 				Import:       []string{},
-// 				PackageName:  v.packageName,
-// 				fullFileName: fname,
-// 				Fields:       []gsTarget{},
-// 			}
-// 			o.out = map[string]outStruct{}
-// 			o.out[fname] = os
-// 			outS = os
-// 		}
-// 		if len(v.Imps) > 0 {
-// 			imports := []string{}
-// 			for distinctImport := range v.Imps {
-// 				imports = append(imports, fmt.Sprintf(`"%s"`, distinctImport.Package))
-// 				// if distinctImport.Alias != "" {
-// 				// 	imports = append(imports, fmt.Sprintf(`%s "%s"`, distinctImport.Alias, distinctImport.Package))
-// 				// } else {
-// 				// }
-// 			}
-// 			outS.Import = append(outS.Import, imports...)
-// 		}
-// 		outS.Fields = append(outS.Fields, v)
-// 		o.out[fname] = outS
-// 	}
-// }
