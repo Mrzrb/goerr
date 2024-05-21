@@ -36,9 +36,11 @@ func NewStruct(n annotation.Node) *Struct {
 		n, t, a := node.extractField(f)
 		fd := field{
 			Ident: Ident{
-				Name:       n,
-				Type:       t,
-				Annotation: a,
+				AnnotationsMix: AnnotationsMix{
+					Annotation: a,
+				},
+				Name: n,
+				Type: t,
 			},
 		}
 		node.Field = append(node.Field, fd)

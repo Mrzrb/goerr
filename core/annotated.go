@@ -6,10 +6,21 @@ type Annotated interface {
 	Annotate() []annotation.Annotation
 }
 
-type Ident struct {
-	Name       string
-	Type       string
+type AnnotationsMix struct {
 	Annotation []annotation.Annotation
+}
+
+type Ident struct {
+	AnnotationsMix
+	Name string
+	Type string
+}
+
+type FuncIdent struct {
+	AnnotationsMix
+	Name   string
+	Param  []Ident
+	Retern []Ident
 }
 
 func Cast[T Annotated](n Annotated) (T, bool) {
