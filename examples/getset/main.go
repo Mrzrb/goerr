@@ -1,6 +1,10 @@
 package main
 
-import "github.com/Mrzrb/goerr/annotations/getset"
+import (
+	"fmt"
+
+	"github.com/Mrzrb/goerr/annotations/getset"
+)
 
 type Ts struct {
 	Field1 string
@@ -12,7 +16,10 @@ type Ts struct {
 
 type innerStruct struct{}
 
-// @Getter
 func TestFunc() (*innerStruct, error) {
 	return nil, nil
+}
+
+func (t *Ts) TestMethod(code int) {
+	fmt.Println("tt")
 }

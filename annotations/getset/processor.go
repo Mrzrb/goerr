@@ -15,7 +15,6 @@ func init() {
 	annotation.Register[GetterSetter](NewGsProcessor(&oIns))
 }
 
-// @Constructor
 type GsProcessor struct {
 	Targets []gsTarget
 	Codes   map[string]string

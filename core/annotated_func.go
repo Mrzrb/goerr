@@ -65,20 +65,7 @@ func (fc *Func) extractFunc(n annotation.Node) string {
 }
 
 func (s *Func) extractField(n *ast.Field) (string, string, []annotation.Annotation) {
-	annotatedNode := s.AnnotatedNode(n)
-	var name, ty string
-	if exp, ok := n.Type.(*ast.StarExpr); ok {
-		name = exp.X.(*ast.Ident).Name
-		ty = utils.ExtractTypeFromExpr(n.Type)
-	} else {
-		if len(n.Names) > 0 {
-			name = n.Names[0].Name
-		}
-
-		ty = utils.ExtractTypeFromExpr(n.Type)
-	}
-	anns := annotatedNode.Annotations()
-	return name, ty, anns
+	return utils.ExtractField(s, n)
 }
 
 func (s *Func) WalkField(fn func(*ast.Field)) {

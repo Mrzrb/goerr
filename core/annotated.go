@@ -10,6 +10,7 @@ type AnnotationsMix struct {
 	Annotation []annotation.Annotation
 }
 
+// @GetterSetter
 type Ident struct {
 	AnnotationsMix
 	Name string
@@ -21,6 +22,11 @@ type FuncIdent struct {
 	Name   string
 	Param  []Ident
 	Retern []Ident
+}
+
+type MethodIdent struct {
+	FuncIdent
+	Receiver Ident
 }
 
 func Cast[T Annotated](n Annotated) (T, bool) {
