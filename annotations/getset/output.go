@@ -46,7 +46,6 @@ var oIns out = out{}
 type out struct {
 	temp *template.Template
 	g    *GsProcessor
-	// out  map[string]outStruct
 }
 
 func init() {

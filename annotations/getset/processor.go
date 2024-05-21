@@ -73,15 +73,6 @@ func (g *GsProcessor) Process(node annotation.Node) error {
 	if v := core.Parse(node); v != nil {
 		g.Parsed = append(g.Parsed, v)
 	}
-	// s := core.NewStruct(node)
-	// fmt.Println(s)
-	// e1 := g.gsProcess(node)
-	// e2 := g.gProcess(node)
-	// e3 := g.sProcess(node)
-	// return utils.Or(
-	// 	e1, e2, e3,
-	// )
-	//
 	return nil
 }
 
