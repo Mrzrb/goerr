@@ -7,4 +7,8 @@ type Ts struct {
 	Field1 string
 	Field2 getset.Getter
 	Test   any
+	Info   innerStruct
+	Infos  *innerStruct
 }
+
+type innerStruct struct{}

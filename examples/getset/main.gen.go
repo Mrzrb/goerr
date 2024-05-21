@@ -21,3 +21,11 @@ func (c *Ts) GetField2() getset.Getter {
 func (c *Ts) GetTest() any {
 	return c.Test
 }
+
+func (c *Ts) GetInfo() innerStruct {
+	return c.Info
+}
+
+func (c *Ts) GetInfos() *innerStruct {
+	return c.Infos
+}
