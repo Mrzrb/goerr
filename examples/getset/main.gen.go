@@ -6,10 +6,6 @@
 
 package main
 
-import (
-	"github.com/Mrzrb/goerr/annotations/getset"
-)
-
 func (c *Ts) GetField1() string {
 	return c.Field1
 }
