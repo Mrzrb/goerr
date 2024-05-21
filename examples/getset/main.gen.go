@@ -25,3 +25,23 @@ func (c *Ts) GetTest() any {
 func (c *Ts) GetInfos() *innerStruct {
 	return c.Infos
 }
+
+func (c *Ts) SetField1(val string) *Ts {
+	c.Field1 = val
+	return c
+}
+
+func (c *Ts) SetField2(val getset.Getter) *Ts {
+	c.Field2 = val
+	return c
+}
+
+func (c *Ts) SetTest(val any) *Ts {
+	c.Test = val
+	return c
+}
+
+func (c *Ts) SetInfos(val *innerStruct) *Ts {
+	c.Infos = val
+	return c
+}

@@ -28,7 +28,7 @@ func (c {{ .Receiver }}) Get{{.Name}}() {{.Type}} {
 `
 
 var setterTpl = `
-func (c *{{ .Receiver }}) Set{{.Name }}(val {{ .Type }}) *{{.Receiver}} {
+func (c {{ .Receiver }}) Set{{.Name }}(val {{ .Type }}) {{.Receiver}} {
     c.{{.RawName}} = val
     return c
 }

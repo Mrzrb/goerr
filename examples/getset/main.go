@@ -6,7 +6,7 @@ import (
 	"github.com/Mrzrb/goerr/annotations/getset"
 )
 
-// @Getter
+// @GetterSetter
 type Ts struct {
 	// innerStruct
 	Field1 string
