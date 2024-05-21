@@ -11,23 +11,29 @@ import (
 )
 
 func init() {
-	annotation.Register[Getter](NewGsProcessor(&oIns))
-	annotation.Register[Setter](NewGsProcessor(&oIns))
-	annotation.Register[GetterSetter](NewGsProcessor(&oIns))
+	processor := NewGsProcessor(&oIns)
+	annotation.Register[Getter](processor)
+	annotation.Register[Setter](processor)
+	annotation.Register[GetterSetter](processor)
 }
 
 type GsProcessor struct {
+	Parsed  []core.Annotated
 	Targets []gsTarget
 	Codes   map[string]string
 	Out     *out
+	core.Collector
 }
 
 func NewGsProcessor(o *out) *GsProcessor {
 	returnValue := GsProcessor{
-		Targets: []gsTarget{},
-		Codes:   map[string]string{},
-		Out:     o,
+		Parsed:    []core.Annotated{},
+		Targets:   []gsTarget{},
+		Codes:     map[string]string{},
+		Out:       o,
+		Collector: core.Collector{},
 	}
+	o.g = &returnValue
 
 	return &returnValue
 }
@@ -63,14 +69,20 @@ func (g *GsProcessor) Output() map[string][]byte {
 
 // Process implements annotation.AnnotationProcessor.
 func (g *GsProcessor) Process(node annotation.Node) error {
-	s := core.NewStruct(node)
-	fmt.Println(s)
-	e1 := g.gsProcess(node)
-	e2 := g.gProcess(node)
-	e3 := g.sProcess(node)
-	return utils.Or(
-		e1, e2, e3,
-	)
+	g.Collector.Process(node)
+	if v := core.Parse(node); v != nil {
+		g.Parsed = append(g.Parsed, v)
+	}
+	// s := core.NewStruct(node)
+	// fmt.Println(s)
+	// e1 := g.gsProcess(node)
+	// e2 := g.gProcess(node)
+	// e3 := g.sProcess(node)
+	// return utils.Or(
+	// 	e1, e2, e3,
+	// )
+	//
+	return nil
 }
 
 func preProcess[T any](node annotation.Node, g *GsProcessor) error {
@@ -108,7 +120,6 @@ func preProcess[T any](node annotation.Node, g *GsProcessor) error {
 		g.appendStruct(node, nss, true, true)
 	}
 
-	g.Out.Process(g)
 	return nil
 }
 

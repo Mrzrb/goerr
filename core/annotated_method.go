@@ -8,13 +8,18 @@ import (
 )
 
 type Method struct {
-	annotation.Node
+	Node
 	MethodIdent
+}
+
+// Nodes implements Annotated.
+func (fc *Method) Nodes() annotation.Node {
+	return fc.Node
 }
 
 func NewMethod(n annotation.Node) *Method {
 	met := &Method{
-		Node: n,
+		Node: Node{n},
 		MethodIdent: MethodIdent{
 			FuncIdent: FuncIdent{},
 			Receiver:  Ident{},

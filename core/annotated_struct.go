@@ -8,9 +8,14 @@ import (
 )
 
 type Struct struct {
-	annotation.Node
+	Node
 	Ident
 	Field []field
+}
+
+// Nodes implements Annotated.
+func (s *Struct) Nodes() annotation.Node {
+	return s.Node
 }
 
 type field struct {
@@ -25,7 +30,7 @@ var _ Annotated = (*Struct)(nil)
 
 func NewStruct(n annotation.Node) *Struct {
 	node := &Struct{
-		Node:  n,
+		Node:  Node{n},
 		Ident: Ident{},
 		Field: []field{},
 	}
@@ -36,11 +41,10 @@ func NewStruct(n annotation.Node) *Struct {
 		n, t, a := node.extractField(f)
 		fd := field{
 			Ident: Ident{
-				AnnotationsMix: AnnotationsMix{
-					Annotation: a,
-				},
-				Name: n,
-				Type: t,
+				AnnotationsMix: AnnotationsMix{Annotation: a},
+				Name:           n,
+				Type:           t,
+				Raw:            f,
 			},
 		}
 		node.Field = append(node.Field, fd)

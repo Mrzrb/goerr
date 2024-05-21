@@ -8,7 +8,7 @@ import (
 
 // @Getter
 type Ts struct {
-	innerStruct
+	// innerStruct
 	Field1 string
 	Field2 getset.Getter
 	Test   any

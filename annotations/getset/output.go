@@ -3,9 +3,11 @@ package getset
 import (
 	"bytes"
 	"fmt"
+	"go/ast"
 	"strings"
 	"text/template"
 
+	"github.com/Mrzrb/goerr/core"
 	"github.com/Mrzrb/goerr/utils"
 )
 
@@ -14,20 +16,20 @@ package {{.PackageName}}
 `
 
 var imprtTpl = `
-    import (
-        {{range .Import}} {{ . }}  {{end}}
-    )
+import (
+    {{range .Import}} "{{ . }}"  {{end}}
+)
 `
 
 var getterTpl = `
-func (c *{{ .TargetName }}) Get{{.Name}}() {{.Type}} {
-    return c.{{.Name}}
+func (c {{ .Receiver }}) Get{{.Name}}() {{.Type}} {
+    return c.{{.RawName}}
 }
 `
 
 var setterTpl = `
-func (c *{{ .TargetName }}) Set{{.Name }}(val {{ .Type }}) *{{.TargetName}} {
-    c.{{.Name}} = val
+func (c *{{ .Receiver }}) Set{{.Name }}(val {{ .Type }}) *{{.Receiver}} {
+    c.{{.RawName}} = val
     return c
 }
 `
@@ -43,14 +45,121 @@ var oIns out = out{}
 
 type out struct {
 	temp *template.Template
-	out  map[string]outStruct
+	g    *GsProcessor
+	// out  map[string]outStruct
 }
 
-type outStruct struct {
-	Import       []string
-	PackageName  string
-	fullFileName string
-	Fields       []gsTarget
+func (o *out) Output(g *GsProcessor) map[string][]byte {
+	ret := map[string][]byte{}
+	groupParsed := utils.GroupBy(g.Parsed, func(t core.Annotated) string {
+		return t.Nodes().Meta().FileName()
+	})
+	for _, v := range groupParsed {
+		parsed := utils.Map(v, func(t core.Annotated) *core.Struct {
+			s := utils.MustBool(core.Cast[*core.Struct](t))
+			return s
+		})
+		dstFile, o := o.output(parsed)
+		ret[dstFile] = o
+	}
+	return ret
+}
+
+func (o *out) output(s []*core.Struct) (string, []byte) {
+	ret := []byte{}
+	if len(s) == 0 {
+		return "", nil
+	}
+	ret = append(ret, o.parsePackage(s[0].Meta().PackageName())...)
+
+	imprts := []string{}
+	for _, i := range s {
+		for _, f := range i.Field {
+			im := utils.GetImports(f.Raw.(*ast.Field).Type, i.Lookup().FindImportByAlias)
+			if len(im.ToSlice()) > 0 {
+				imprts = append(imprts, im.ToSlice()[0].Package)
+			}
+		}
+	}
+	if len(imprts) > 0 {
+		ret = append(ret, o.parseImport(imprts)...)
+	}
+
+	for _, parsed := range s {
+		s := utils.MustBool(core.Cast[*core.Struct](parsed))
+		if core.ContainsAnnotate[GetterSetter](s) {
+			ret = append(ret, o.parseGetter(s)...)
+			ret = append(ret, o.parseSetter(s)...)
+			continue
+		}
+		if core.ContainsAnnotate[Getter](s) {
+			ret = append(ret, o.parseGetter(s)...)
+		}
+		if core.ContainsAnnotate[Setter](s) {
+			ret = append(ret, o.parseSetter(s)...)
+		}
+	}
+
+	f := s[0].DstFileName()
+	return f, ret
+}
+
+func (o *out) parsePackage(pkg string) []byte {
+	pkgTpl := o.temp.Lookup(pkgName)
+	if pkgTpl != nil {
+		return utils.Must(ExecuteTemplate(pkgTpl, map[string]any{
+			"PackageName": pkg,
+		}))
+	}
+	return nil
+}
+
+func (o *out) parseImport(imprts []string) []byte {
+	impTpl := o.temp.Lookup(importName)
+	if impTpl != nil {
+		return utils.Must(ExecuteTemplate(impTpl, map[string]any{
+			"Import": imprts,
+		}))
+	}
+	return nil
+}
+
+func (o *out) parseGetter(data *core.Struct) []byte {
+	ret := []byte{}
+	getterTpl := o.temp.Lookup(getterName)
+	for _, v := range data.Field {
+		if v.Name == "" {
+			continue
+		}
+		param := map[string]any{
+			"Receiver": "*" + data.Type,
+			"Name":     strings.Title(v.Name),
+			"RawName":  v.Name,
+			"Type":     v.Type,
+		}
+		ret = append(ret, utils.Must(ExecuteTemplate(getterTpl, param))...)
+	}
+
+	return ret
+}
+
+func (o *out) parseSetter(data *core.Struct) []byte {
+	ret := []byte{}
+	setterTpl := o.temp.Lookup(setterName)
+	for _, v := range data.Field {
+		if v.Name == "" {
+			continue
+		}
+		param := map[string]any{
+			"Receiver": "*" + data.Type,
+			"Name":     strings.Title(v.Name),
+			"RawName":  v.Name,
+			"Type":     v.Type,
+		}
+		ret = append(ret, utils.Must(ExecuteTemplate(setterTpl, param))...)
+	}
+
+	return ret
 }
 
 func ExecuteTemplate(tpl *template.Template, data any) ([]byte, error) {
@@ -62,38 +171,38 @@ func ExecuteTemplate(tpl *template.Template, data any) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func (os *outStruct) Out(formatter *template.Template) []byte {
-	ret := []byte{}
-	pkgTpl := formatter.Lookup(pkgName)
-	if pkgTpl != nil {
-		ret = append(ret, utils.Must(ExecuteTemplate(pkgTpl, os))...)
-	} else {
-		return nil
-	}
-
-	if len(os.Import) > 0 {
-		impTpl := formatter.Lookup(importName)
-		if impTpl != nil {
-			ret = append(ret, utils.Must(ExecuteTemplate(impTpl, os))...)
-		}
-	}
-
-	if len(os.Fields) > 0 {
-		setterTpl := formatter.Lookup(setterName)
-		getterTpl := formatter.Lookup(getterName)
-		for _, f := range os.Fields {
-			for _, ff := range f.field {
-				if ff.IsGetter {
-					ret = append(ret, utils.Must(ExecuteTemplate(getterTpl, ff))...)
-				}
-				if ff.IsSetter {
-					ret = append(ret, utils.Must(ExecuteTemplate(setterTpl, ff))...)
-				}
-			}
-		}
-	}
-	return ret
-}
+// func (os *outStruct) Out(formatter *template.Template) []byte {
+// 	ret := []byte{}
+// 	pkgTpl := formatter.Lookup(pkgName)
+// 	if pkgTpl != nil {
+// 		ret = append(ret, utils.Must(ExecuteTemplate(pkgTpl, os))...)
+// 	} else {
+// 		return nil
+// 	}
+//
+// 	if len(os.Import) > 0 {
+// 		impTpl := formatter.Lookup(importName)
+// 		if impTpl != nil {
+// 			ret = append(ret, utils.Must(ExecuteTemplate(impTpl, os))...)
+// 		}
+// 	}
+//
+// 	if len(os.Fields) > 0 {
+// 		setterTpl := formatter.Lookup(setterName)
+// 		getterTpl := formatter.Lookup(getterName)
+// 		for _, f := range os.Fields {
+// 			for _, ff := range f.field {
+// 				if ff.IsGetter {
+// 					ret = append(ret, utils.Must(ExecuteTemplate(getterTpl, ff))...)
+// 				}
+// 				if ff.IsSetter {
+// 					ret = append(ret, utils.Must(ExecuteTemplate(setterTpl, ff))...)
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return ret
+// }
 
 func init() {
 	temp := utils.Must(template.New(pkgName).Parse(tpl))
@@ -104,42 +213,41 @@ func init() {
 }
 
 func (o *out) Out() map[string][]byte {
-	ret := map[string][]byte{}
-	for file, outStruct := range o.out {
-		fnames := strings.Split(file, ".")
-		utils.InsertInPos(&fnames, "gen", int64(len(fnames)-1))
-		ret[strings.Join(fnames, ".")] = outStruct.Out(o.temp)
-	}
-	return ret
+	return o.Output(o.g)
+	// for file, outStruct := range o.out {
+	// 	fnames := strings.Split(file, ".")
+	// 	utils.InsertInPos(&fnames, "gen", int64(len(fnames)-1))
+	// 	ret[strings.Join(fnames, ".")] = outStruct.Out(o.temp)
+	// }
 }
 
-func (o *out) Process(gs *GsProcessor) {
-	for _, v := range gs.Targets {
-		fname := v.FullFileName()
-		outS, ok := o.out[fname]
-		if !ok {
-			os := outStruct{
-				Import:       []string{},
-				PackageName:  v.packageName,
-				fullFileName: fname,
-				Fields:       []gsTarget{},
-			}
-			o.out = map[string]outStruct{}
-			o.out[fname] = os
-			outS = os
-		}
-		if len(v.Imps) > 0 {
-			imports := []string{}
-			for distinctImport := range v.Imps {
-				imports = append(imports, fmt.Sprintf(`"%s"`, distinctImport.Package))
-				// if distinctImport.Alias != "" {
-				// 	imports = append(imports, fmt.Sprintf(`%s "%s"`, distinctImport.Alias, distinctImport.Package))
-				// } else {
-				// }
-			}
-			outS.Import = append(outS.Import, imports...)
-		}
-		outS.Fields = append(outS.Fields, v)
-		o.out[fname] = outS
-	}
-}
+// func (o *out) Process(gs *GsProcessor) {
+// 	for _, v := range gs.Targets {
+// 		fname := v.FullFileName()
+// 		outS, ok := o.out[fname]
+// 		if !ok {
+// 			os := outStruct{
+// 				Import:       []string{},
+// 				PackageName:  v.packageName,
+// 				fullFileName: fname,
+// 				Fields:       []gsTarget{},
+// 			}
+// 			o.out = map[string]outStruct{}
+// 			o.out[fname] = os
+// 			outS = os
+// 		}
+// 		if len(v.Imps) > 0 {
+// 			imports := []string{}
+// 			for distinctImport := range v.Imps {
+// 				imports = append(imports, fmt.Sprintf(`"%s"`, distinctImport.Package))
+// 				// if distinctImport.Alias != "" {
+// 				// 	imports = append(imports, fmt.Sprintf(`%s "%s"`, distinctImport.Alias, distinctImport.Package))
+// 				// } else {
+// 				// }
+// 			}
+// 			outS.Import = append(outS.Import, imports...)
+// 		}
+// 		outS.Fields = append(outS.Fields, v)
+// 		o.out[fname] = outS
+// 	}
+// }

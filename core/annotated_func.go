@@ -8,8 +8,13 @@ import (
 )
 
 type Func struct {
-	annotation.Node
+	Node
 	FuncIdent
+}
+
+// Nodes implements Annotated.
+func (f *Func) Nodes() annotation.Node {
+	return f.Node
 }
 
 // Annotate implements Annotated.
@@ -21,7 +26,7 @@ var _ Annotated = (*Func)(nil)
 
 func NewFunc(n annotation.Node) *Func {
 	fc := &Func{
-		Node: n,
+		Node: Node{n},
 		FuncIdent: FuncIdent{
 			AnnotationsMix: AnnotationsMix{},
 			Name:           "",
