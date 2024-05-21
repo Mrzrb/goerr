@@ -41,10 +41,10 @@ func (a *assembler) Assmble(o outputer) []byte {
 	pkg := temp.Lookup(pkgName)
 	if pkg == nil {
 		panic(pkg)
-		ret = append(ret, utils.Must(ExecuteTemplate(pkg, map[string]any{
-			"PackageName": o.Package(),
-		}))...)
 	}
+	ret = append(ret, utils.Must(ExecuteTemplate(pkg, map[string]any{
+		"PackageName": o.Package(),
+	}))...)
 	if len(o.Imports()) > 0 {
 		imp := temp.Lookup(importName)
 		if imp == nil {

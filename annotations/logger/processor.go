@@ -5,12 +5,16 @@ import (
 	annotation "github.com/YReshetko/go-annotation/pkg"
 )
 
+// @Constructor
 type LoggerProcess struct {
-	core.Collector
+	core.Collector // @Init
+	core.FileExporter
 }
 
 func init() {
-	p := LoggerProcess{}
+	a := core.NewAssembler()
+	e := core.NewExporter(&a)
+	p := NewLoggerProcess(&e)
 	annotation.Register[Logger](&p)
 }
 
@@ -21,13 +25,16 @@ func (l *LoggerProcess) Name() string {
 
 // Output implements annotation.AnnotationProcessor.
 func (l *LoggerProcess) Output() map[string][]byte {
-	return nil
+	ret := l.FileExporter.Export()
+	return ret
 }
 
 // Process implements annotation.AnnotationProcessor.
 // Subtle: this method shadows the method (Collector).Process of LoggerProcess.Collector.
 func (l *LoggerProcess) Process(node annotation.Node) error {
 	l.Collector.Process(node)
+	u := Unit{}
+	l.FileExporter.Append(&u)
 	return nil
 }
 
