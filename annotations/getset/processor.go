@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/ast"
 
+	"github.com/Mrzrb/goerr/core"
 	"github.com/Mrzrb/goerr/utils"
 	annotation "github.com/YReshetko/go-annotation/pkg"
 )
@@ -62,6 +63,8 @@ func (g *GsProcessor) Output() map[string][]byte {
 
 // Process implements annotation.AnnotationProcessor.
 func (g *GsProcessor) Process(node annotation.Node) error {
+	s := core.NewStruct(node)
+	fmt.Println(s)
 	e1 := g.gsProcess(node)
 	e2 := g.gProcess(node)
 	e3 := g.sProcess(node)

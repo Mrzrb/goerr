@@ -54,10 +54,11 @@ func (s *Struct) extractStruct(n *ast.TypeSpec) (string, string) {
 }
 
 func (s *Struct) extractField(n *ast.Field) (string, string, []annotation.Annotation) {
-	annotatedNode := s.AnnotatedNode(n)
-	name, ty := n.Names[0].Name, utils.ExtractTypeFromExpr(n.Type)
-	anns := annotatedNode.Annotations()
-	return name, ty, anns
+	return utils.ExtractField(s, n)
+	// annotatedNode := s.AnnotatedNode(n)
+	// name, ty := n.Names[0].Name, utils.ExtractTypeFromExpr(n.Type)
+	// anns := annotatedNode.Annotations()
+	// return name, ty, anns
 }
 
 func (s *Struct) WalkField(fn func(*ast.Field)) {
