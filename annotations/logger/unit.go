@@ -43,8 +43,8 @@ func (u *Unit) File() string {
 
 // Imports implements core.Outputer.
 func (u *Unit) Imports() []string {
-	u.Import = append(u.Import, "time", "git.zuoyebang.cc/pkg/golib/v2/zlog", "github.com/gin-gonic/gin")
-	return u.Import
+	u.Import = append(u.Import, "time", "git.zuoyebang.cc/pkg/golib/v2/zlog")
+	return utils.Uniq(u.Import, func(t string) string { return t })
 }
 
 // Output implements core.Outputer.

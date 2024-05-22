@@ -69,7 +69,6 @@ func parseUnit(node core.Annotated) core.Outputer {
 	}
 
 	u.HasReturn = len(u.Returns) > 0
-
 	u.Packages = node.Nodes().Meta().PackageName()
 	u.Param = strings.Join(utils.Map(u.Params, func(t core.Ident) string {
 		return fmt.Sprintf("%s %s", t.Name, t.Type)
@@ -77,6 +76,10 @@ func parseUnit(node core.Annotated) core.Outputer {
 	u.CallParam = strings.Join(utils.Map(u.Params, func(t core.Ident) string {
 		return fmt.Sprintf("%s", t.Name)
 	}), ",")
+
+	utils.Walk(node.Nodes().Imports(), func(is *ast.ImportSpec) {
+		u.Import = append(u.Import, strings.Trim(is.Path.Value, "\""))
+	})
 
 	if len(u.Returns) > 0 {
 		if len(u.Returns) == 1 {

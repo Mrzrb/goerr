@@ -33,3 +33,25 @@ func Map[T any, R any](src []T, fn func(T) R) []R {
 
 	return ret
 }
+
+func Walk[T any](src []T, fn func(T)) {
+	for _, v := range src {
+		fn(v)
+	}
+}
+
+func Uniq[T any, K comparable](src []T, fn func(T) K) []T {
+	var ret []T
+	um := map[K]any{}
+
+	for _, v := range src {
+		k := fn(v)
+		if _, ok := um[k]; !ok {
+			um[k] = 1
+			ret = append(ret, v)
+		}
+		continue
+	}
+
+	return ret
+}

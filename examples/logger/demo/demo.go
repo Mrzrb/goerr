@@ -1,8 +1,12 @@
 package demo
 
-import "github.com/gin-gonic/gin"
+import (
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
 
 // @Logger
-func TestPackage(ctx *gin.Context) int {
+func TestPackage(ctx *gin.Context, t time.Time) int {
 	return 1
 }
