@@ -17,7 +17,8 @@ package {{.PackageName}}
 
 var imprtTpl = `
 import (
-    {{range .Import}} "{{ . }}"  {{end}}
+    {{range .Import}}"{{ . }}"
+    {{end}}
 )
 `
 
