@@ -61,7 +61,7 @@ func parseUnit(node core.Annotated) core.Outputer {
 		u.file = m.DstFileName()
 	}
 	if f, ok := core.Cast[*core.Func](node); ok {
-		u.IsMethod = true
+		u.IsMethod = false
 		u.FuncName = f.Name
 		u.Params = f.Param
 		u.Returns = f.Retern
@@ -70,6 +70,7 @@ func parseUnit(node core.Annotated) core.Outputer {
 
 	u.HasReturn = len(u.Returns) > 0
 
+	u.Packages = node.Nodes().Meta().PackageName()
 	u.Param = strings.Join(utils.Map(u.Params, func(t core.Ident) string {
 		return fmt.Sprintf("%s %s", t.Name, t.Type)
 	}), ",")

@@ -5,6 +5,7 @@ import (
 	"github.com/Mrzrb/goerr/utils"
 )
 
+// @Getter
 type Unit struct {
 	IsMethod  bool
 	Receiver  string
@@ -15,6 +16,7 @@ type Unit struct {
 	Return    string
 	CallParam string
 	HasReturn bool
+	Packages  string
 
 	Context core.Ident
 
@@ -52,7 +54,7 @@ func (u *Unit) Output() []byte {
 
 // Package implements core.Outputer.
 func (u *Unit) Package() string {
-	return "main"
+	return u.Packages
 }
 
 var _ core.Outputer = (*Unit)(nil)
