@@ -1,6 +1,6 @@
 module github.com/Mrzrb/goerr
 
-go 1.21
+go 1.18
 
 require github.com/YReshetko/go-annotation v0.1.4
 
