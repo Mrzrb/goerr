@@ -3,7 +3,7 @@ package core
 import (
 	"bytes"
 	"fmt"
-	"html/template"
+	"text/template"
 
 	"github.com/Mrzrb/goerr/utils"
 )
@@ -14,7 +14,8 @@ package {{.PackageName}}
 
 var imprtTpl = `
 import (
-    {{range .Import}} "{{ . }}"  {{end}}
+    {{range .Import}} 
+    "{{ . }}"  {{end}}
 )
 `
 

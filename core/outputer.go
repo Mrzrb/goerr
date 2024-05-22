@@ -1,6 +1,8 @@
 package core
 
 import (
+	"fmt"
+
 	"github.com/Mrzrb/goerr/utils"
 )
 
@@ -11,6 +13,7 @@ type Outputer interface {
 }
 
 type outputer interface {
+	Valid() bool
 	Output() []byte
 	Imports() []string
 	Package() string
@@ -68,6 +71,9 @@ func (e *exporter) Export() map[string][]byte {
 		for _, v := range ge {
 			if _, ok := e.cache[f]; !ok {
 				ret[f] = append(ret[f], e.Assembler.Assmble(v)...)
+			}
+			if !v.Valid() {
+				panic(fmt.Sprintf("param not valid %+v", v))
 			}
 			ret[f] = append(ret[f], v.Output()...)
 		}

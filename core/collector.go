@@ -13,3 +13,9 @@ func (c *Collector) Process(node annotation.Node) error {
 	}
 	return nil
 }
+
+func (c *Collector) Walk(fn func(node Annotated)) {
+	for _, n := range c.Annotations {
+		fn(n)
+	}
+}
