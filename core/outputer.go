@@ -71,6 +71,7 @@ func (e *exporter) Export() map[string][]byte {
 		for _, v := range ge {
 			if _, ok := e.cache[f]; !ok {
 				ret[f] = append(ret[f], e.Assembler.Assmble(v)...)
+				e.cache[f] = 1
 			}
 			if !v.Valid() {
 				panic(fmt.Sprintf("param not valid %+v", v))

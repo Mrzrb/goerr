@@ -16,10 +16,13 @@ type LoggerProcess struct {
 	core.FileExporter
 }
 
+var (
+	a = core.NewAssembler()
+	e = core.NewExporter(&a)
+	p = NewLoggerProcess(&e)
+)
+
 func init() {
-	a := core.NewAssembler()
-	e := core.NewExporter(&a)
-	p := NewLoggerProcess(&e)
 	annotation.Register[Logger](&p)
 }
 
@@ -103,6 +106,7 @@ func parseUnit(node core.Annotated) core.Outputer {
 // Process implements annotation.AnnotationProcessor.
 // Subtle: this method shadows the method (Collector).Process of LoggerProcess.Collector.
 func (l *LoggerProcess) Process(node annotation.Node) error {
+	fmt.Println(l.FileExporter)
 	if _, ok := annotation.CastNode[*ast.FuncDecl](node); !ok {
 		panic("logger must applied on func or method")
 	}
