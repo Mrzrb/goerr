@@ -5,7 +5,6 @@ import (
 	"github.com/Mrzrb/goerr/utils"
 )
 
-// @Getter
 type Unit struct {
 	IsMethod  bool
 	Receiver  string
@@ -43,7 +42,7 @@ func (u *Unit) File() string {
 
 // Imports implements core.Outputer.
 func (u *Unit) Imports() []string {
-	u.Import = append(u.Import, "time", "git.zuoyebang.cc/pkg/golib/v2/zlog")
+	u.Import = append(u.Import, "time", "git.zuoyebang.cc/pkg/golib/v2/zlog", "github.com/gin-gonic/gin")
 	return utils.Uniq(u.Import, func(t string) string { return t })
 }
 

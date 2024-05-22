@@ -2,6 +2,10 @@ package utils
 
 import (
 	"go/ast"
+	"strings"
+
+	"github.com/Mrzrb/goerr/utils/stream"
+	annotation "github.com/YReshetko/go-annotation/pkg"
 )
 
 type ImportLookup func(alias string) (importPath string, found bool)
@@ -50,10 +54,46 @@ func (d DistinctImports) ToSlice() []Import {
 	return i
 }
 
+func getSelectorExpr(e ast.Node) *ast.SelectorExpr {
+	switch i := e.(type) {
+	case *ast.ArrayType:
+		if in, ok := i.Elt.(*ast.StarExpr); ok {
+			if inn, ok := in.X.(*ast.SelectorExpr); ok {
+				return inn
+			}
+		}
+	}
+
+	return nil
+}
+
+func ImprtTry(node annotation.Node) ImportLookup {
+	return func(alias string) (importPath string, found bool) {
+		imp := stream.
+			OfSlice(Map(node.Imports(), func(t *ast.ImportSpec) string { return t.Path.Value })).
+			Map(func(s string) string {
+				return strings.Trim(s, "\"")
+			}).
+			Filter(func(s string) bool {
+				return len(stream.OfSlice(strings.Split(s, "/")).
+					Filter(func(ss string) bool {
+						return ss == alias
+					}).ToSlice()) > 0
+			}).One()
+		if imp != "" {
+			return imp, true
+		}
+		return "", false
+	}
+}
+
 func GetImports(e ast.Expr, lookup ImportLookup) DistinctImports {
 	out := NewDistinctImports()
 	ast.Inspect(e, func(node ast.Node) bool {
 		switch n := node.(type) {
+		case *ast.ArrayType:
+			i := GetImports(getSelectorExpr(n), lookup)
+			out.Merge(i)
 		case *ast.SelectorExpr:
 			switch i := n.X.(type) {
 			case *ast.Ident:

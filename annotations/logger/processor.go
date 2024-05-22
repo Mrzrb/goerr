@@ -68,6 +68,17 @@ func parseUnit(node core.Annotated) core.Outputer {
 		u.file = f.DstFileName()
 	}
 
+	i := utils.DistinctImports{}
+	fields := append(u.Params, u.Returns...)
+	utils.Walk(fields, func(t core.Ident) {
+		f, ok := t.Raw.(*ast.Field)
+		if !ok {
+			return
+		}
+		i.Merge(utils.GetImports(f.Type, node.Nodes().Lookup().FindImportByAlias))
+		i.Merge(utils.GetImports(f.Type, utils.ImprtTry(node.Nodes())))
+	})
+	u.Import = utils.Map(i.ToSlice(), func(t utils.Import) string { return t.Package })
 	u.HasReturn = len(u.Returns) > 0
 	u.Packages = node.Nodes().Meta().PackageName()
 	u.Param = strings.Join(utils.Map(u.Params, func(t core.Ident) string {
@@ -76,10 +87,6 @@ func parseUnit(node core.Annotated) core.Outputer {
 	u.CallParam = strings.Join(utils.Map(u.Params, func(t core.Ident) string {
 		return fmt.Sprintf("%s", t.Name)
 	}), ",")
-
-	utils.Walk(node.Nodes().Imports(), func(is *ast.ImportSpec) {
-		u.Import = append(u.Import, strings.Trim(is.Path.Value, "\""))
-	})
 
 	if len(u.Returns) > 0 {
 		if len(u.Returns) == 1 {

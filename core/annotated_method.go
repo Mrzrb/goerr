@@ -37,6 +37,7 @@ func NewMethod(n annotation.Node) *Method {
 			Type: "",
 		}
 		p.Name, p.Type, p.Annotation = utils.ExtractField(n, f)
+		p.Raw = f
 		met.Param = append(met.Param, p)
 	})
 	met.WalkReturn(func(f *ast.Field) {
@@ -48,6 +49,7 @@ func NewMethod(n annotation.Node) *Method {
 			Type: "",
 		}
 		p.Name, p.Type, p.Annotation = utils.ExtractField(n, f)
+		p.Raw = f
 		met.Retern = append(met.Retern, p)
 	})
 

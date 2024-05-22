@@ -45,6 +45,7 @@ func NewFunc(n annotation.Node) *Func {
 			Name: "",
 			Type: "",
 		}
+		p.Raw = f
 		p.Name, p.Type, p.Annotation = fc.extractField(f)
 		fc.Param = append(fc.Param, p)
 	})
@@ -58,6 +59,7 @@ func NewFunc(n annotation.Node) *Func {
 			Type: "",
 		}
 		p.Name, p.Type, p.Annotation = fc.extractField(f)
+		p.Raw = f
 		fc.Retern = append(fc.Retern, p)
 	})
 
