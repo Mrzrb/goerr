@@ -1,7 +1,11 @@
 package aop
 
 import (
+	"bytes"
+	"fmt"
+
 	"github.com/Mrzrb/goerr/core"
+	"github.com/Mrzrb/goerr/utils"
 	annotation "github.com/YReshetko/go-annotation/pkg"
 )
 
@@ -32,6 +36,9 @@ func (p *Processor) Output() map[string][]byte {
 
 // Process implements annotation.AnnotationProcessor.
 func (p *Processor) Process(node annotation.Node) error {
+	b := bytes.NewBufferString("")
+	utils.AstToGo(b, node.ASTNode())
+	fmt.Println(b.String())
 	if len(annotation.FindAnnotations[Aop](node.Annotations())) <= 0 {
 		return nil
 	}

@@ -6,8 +6,6 @@
 
 package aop
 
-import "github.com/Mrzrb/goerr/core"
-
 func NewProcessor(FileExporter core.FileExporter) Processor {
 	returnValue := Processor{
 		FileExporter: FileExporter,

@@ -36,6 +36,8 @@ func (e *exporter) Append(f Outputer) {
 	e.Files = append(e.Files, f)
 }
 
+var Assembler = NewAssembler()
+
 // @Constructor
 type assembler struct{}
 

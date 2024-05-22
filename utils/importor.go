@@ -95,6 +95,9 @@ func GetImports(e ast.Expr, lookup ImportLookup) DistinctImports {
 			i := GetImports(getSelectorExpr(n), lookup)
 			out.Merge(i)
 		case *ast.SelectorExpr:
+			if n == nil || n.X == nil {
+				return false
+			}
 			switch i := n.X.(type) {
 			case *ast.Ident:
 				alias := i.String()
