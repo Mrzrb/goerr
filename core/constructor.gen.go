@@ -6,6 +6,8 @@
 
 package core
 
+var Assembler = NewAssembler()
+
 func NewAssembler() assembler {
 	returnValue := assembler{}
 

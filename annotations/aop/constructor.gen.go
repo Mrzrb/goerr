@@ -4,10 +4,12 @@
 //		go-annotation: 0.1.0
 //		Constructor: 1.0.0
 
-package logger
+package aop
 
-func NewLoggerProcess(FileExporter core.FileExporter) LoggerProcess {
-	returnValue := LoggerProcess{
+import "github.com/Mrzrb/goerr/core"
+
+func NewProcessor(FileExporter core.FileExporter) Processor {
+	returnValue := Processor{
 		FileExporter: FileExporter,
 	}
 
