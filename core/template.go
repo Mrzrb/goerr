@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/Mrzrb/goerr/utils"
@@ -38,4 +39,10 @@ func ExecuteTemplate(tpl *template.Template, data any) ([]byte, error) {
 		return nil, fmt.Errorf("unable to process template %s: %w", tpl.Name(), err)
 	}
 	return b.Bytes(), nil
+}
+
+func CustomeTemplateFuncs() template.FuncMap {
+	ret := template.FuncMap{}
+	ret["join"] = strings.Join
+	return ret
 }

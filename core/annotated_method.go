@@ -73,6 +73,17 @@ func (fc *Method) extractMethod(n annotation.Node) string {
 	return ft.Name.Name
 }
 
+func (s *Method) Imports() []string {
+	im := []string{}
+	s.WalkField(func(f *ast.Field) {
+		im = append(im, s.Node.Import(f.Type)...)
+	})
+	s.WalkReturn(func(f *ast.Field) {
+		im = append(im, s.Node.Import(f.Type)...)
+	})
+	return im
+}
+
 func (s *Method) WalkField(fn func(*ast.Field)) {
 	for _, v := range s.ASTNode().(*ast.FuncDecl).Type.Params.List {
 		fn(v)

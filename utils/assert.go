@@ -14,6 +14,13 @@ func MustBool[T any](t T, b bool) T {
 	return t
 }
 
+func MustPointer[T any](t *T) *T {
+	if t == nil {
+		panic(t)
+	}
+	return t
+}
+
 func Or(errs ...error) error {
 	for _, v := range errs {
 		if v != nil {

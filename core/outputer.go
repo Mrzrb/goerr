@@ -24,6 +24,25 @@ type FileExporter interface {
 	Export() map[string][]byte
 }
 
+// @Getter
+type BaseOutputer struct {
+	File    string
+	Imports []string
+	Package string
+}
+
+type BaseFuncOutputer struct {
+	IsMethod  bool
+	Receiver  string
+	FuncName  string
+	Params    []Ident
+	Param     string
+	Returns   []Ident
+	Return    string
+	CallParam string
+	HasReturn bool
+}
+
 // @Constructor
 type exporter struct {
 	Files     []Outputer // @Init

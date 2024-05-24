@@ -10,9 +10,10 @@ type Aop struct {
 type MixinType string
 
 const (
-	Before MixinType = "before"
-	Around MixinType = "around"
-	After  MixinType = "after"
+	Before     MixinType = "before"
+	Around     MixinType = "around"
+	After      MixinType = "after"
+	CatchPanic MixinType = "catchPanic"
 )
 
 type Jointcut struct {

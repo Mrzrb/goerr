@@ -15,7 +15,7 @@ type Annotated interface {
 }
 
 type Generator interface {
-	DstFileName() string
+	DstFileName(...string) string
 }
 
 type AnnotationsMix struct {
@@ -26,10 +26,18 @@ type Node struct {
 	annotation.Node
 }
 
-func (n *Node) DstFileName() string {
+func (n *Node) Import(t ast.Expr) []string {
+	i := utils.DistinctImports{}
+	i.Merge(utils.GetImports(t, utils.ImprtTry(n)))
+	return utils.Map(i.ToSlice(), func(t utils.Import) string {
+		return t.Package
+	})
+}
+
+func (n *Node) DstFileName(f ...string) string {
 	rawFileName := n.Meta().Dir() + "/" + n.Meta().FileName()
 	fnames := strings.Split(rawFileName, ".")
-	utils.InsertInPos(&fnames, "gen", len(fnames)-1)
+	utils.InsertInPos(&fnames, strings.Join(f, ".")+"gen", len(fnames)-1)
 	return strings.Join(fnames, ".")
 }
 
@@ -73,4 +81,30 @@ func Parse(node annotation.Node) Annotated {
 
 func ContainsAnnotate[T any](n Annotated) bool {
 	return len(annotation.FindAnnotations[T](n.Annotate())) > 0
+}
+
+func GetByName(t []Annotated, name string) Annotated {
+	return utils.Filter(t, func(a Annotated) bool {
+		n := ""
+		switch a.(type) {
+		case *Func:
+			n = a.(*Func).Name
+		case *Method:
+			n = a.(*Method).Name
+		case *Struct:
+			n = a.(*Struct).Name
+		}
+		return n == name
+	})[0]
+}
+
+func GetMethod(t []Annotated, structName string) []Annotated {
+	return utils.Filter(t, func(a Annotated) bool {
+		n := ""
+		switch a.(type) {
+		case *Method:
+			n = a.(*Method).Receiver.Type
+		}
+		return n == structName
+	})
 }

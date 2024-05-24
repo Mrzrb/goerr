@@ -72,7 +72,7 @@ func (fc *Func) extractFunc(n annotation.Node) string {
 }
 
 func (s *Func) extractField(n *ast.Field) (string, string, []annotation.Annotation) {
-	return utils.ExtractField(s, n)
+	return utils.ExtractField(s.Node, n)
 }
 
 func (s *Func) WalkField(fn func(*ast.Field)) {
@@ -89,4 +89,15 @@ func (s *Func) WalkReturn(fn func(*ast.Field)) {
 	for _, v := range results.List {
 		fn(v)
 	}
+}
+
+func (s *Func) Imports() []string {
+	im := []string{}
+	s.WalkField(func(f *ast.Field) {
+		im = append(im, s.Node.Import(f.Type)...)
+	})
+	s.WalkReturn(func(f *ast.Field) {
+		im = append(im, s.Node.Import(f.Type)...)
+	})
+	return im
 }

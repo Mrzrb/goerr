@@ -55,3 +55,17 @@ func Uniq[T any, K comparable](src []T, fn func(T) K) []T {
 
 	return ret
 }
+
+func Filter[T any](arr []T, fn func(T) bool) []T {
+	var ret []T
+	for _, v := range arr {
+		if fn(v) {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
+
+func Contains[T comparable](arr []T, item T) bool {
+	return len(Filter(arr, func(t T) bool { return item == t })) > 0
+}

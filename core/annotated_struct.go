@@ -10,7 +10,15 @@ import (
 type Struct struct {
 	Node
 	Ident
-	Field []field
+	Field []Field
+}
+
+func (s *Struct) Imports() []string {
+	im := []string{}
+	s.WalkField(func(f *ast.Field) {
+		im = append(im, s.Node.Import(f.Type)...)
+	})
+	return im
 }
 
 // Nodes implements Annotated.
@@ -18,7 +26,7 @@ func (s *Struct) Nodes() annotation.Node {
 	return s.Node
 }
 
-type field struct {
+type Field struct {
 	Ident
 }
 
@@ -32,14 +40,14 @@ func NewStruct(n annotation.Node) *Struct {
 	node := &Struct{
 		Node:  Node{n},
 		Ident: Ident{},
-		Field: []field{},
+		Field: []Field{},
 	}
 	// node ident
 	node.Name, node.Type = node.extractStruct(n.ASTNode().(*ast.TypeSpec))
 	node.Annotation = n.Annotations()
 	node.WalkField(func(f *ast.Field) {
 		n, t, a := node.extractField(f)
-		fd := field{
+		fd := Field{
 			Ident: Ident{
 				AnnotationsMix: AnnotationsMix{Annotation: a},
 				Name:           n,
@@ -58,7 +66,7 @@ func (s *Struct) extractStruct(n *ast.TypeSpec) (string, string) {
 }
 
 func (s *Struct) extractField(n *ast.Field) (string, string, []annotation.Annotation) {
-	return utils.ExtractField(s, n)
+	return utils.ExtractField(s.Node, n)
 	// annotatedNode := s.AnnotatedNode(n)
 	// name, ty := n.Names[0].Name, utils.ExtractTypeFromExpr(n.Type)
 	// anns := annotatedNode.Annotations()

@@ -6,6 +6,8 @@
 
 package logger
 
+import "github.com/Mrzrb/goerr/core"
+
 func NewLoggerProcess(FileExporter core.FileExporter) LoggerProcess {
 	returnValue := LoggerProcess{
 		FileExporter: FileExporter,
