@@ -41,7 +41,7 @@ func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
 		},
 	}
     {{range .Params}}
-    joint.Args = append(joint.Args, aop.Args{ {{.Name}}, {{.Type}} }){{end}}
+    joint.Args = append(joint.Args, aop.Args{ Name : "{{.Name}}", Type: "{{.Type}}" }){{end}}
 
     r.aspect.{{.AffectedMethodName}}(joint)
 
