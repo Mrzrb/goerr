@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestProxy(t *testing.T) {
 	d := NewBisClientProxy(&BisClient{})
@@ -9,4 +11,5 @@ func TestProxy(t *testing.T) {
 
 func Run(d BisClientInterface) {
 	d.Hello()
+	d.Hello2()
 }

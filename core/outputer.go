@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Mrzrb/goerr/utils"
 )
@@ -31,6 +32,15 @@ type BaseOutputer struct {
 	Package string
 }
 
+func (b *BaseOutputer) PushImport(pkgName string, dirName string) {
+	pkg := pkgName
+	if pkgName != b.Package {
+		pkg = utils.GetFullPackage(dirName)
+	}
+
+	b.Imports = append(b.Imports, pkg)
+}
+
 type BaseFuncOutputer struct {
 	IsMethod  bool
 	Receiver  string
@@ -41,6 +51,34 @@ type BaseFuncOutputer struct {
 	Return    string
 	CallParam string
 	HasReturn bool
+}
+
+func (b *BaseFuncOutputer) AssembleParamString() string {
+	return strings.Join(utils.Map(b.Params, func(t Ident) string {
+		return fmt.Sprintf("%s %s", t.Name, t.Type)
+	}), ",")
+}
+
+func (b *BaseFuncOutputer) AssembleCallParamString() string {
+	return strings.Join(utils.Map(b.Params, func(t Ident) string {
+		return fmt.Sprintf("%s", t.Name)
+	}), ",")
+}
+
+func (b *BaseFuncOutputer) AssembleReturnString() string {
+	idx := 0
+	return "(" + strings.Join(utils.Map(b.Returns, func(t Ident) string {
+		idx++
+		return fmt.Sprintf("ret%d %s", idx, t.Type)
+	}), ",") + ")"
+}
+
+func (b *BaseFuncOutputer) AssembleReturnDecl() string {
+	idx := 0
+	return strings.Join(utils.Map(b.Returns, func(t Ident) string {
+		idx++
+		return fmt.Sprintf("ret%d", idx)
+	}), ",")
 }
 
 // @Constructor
@@ -75,7 +113,7 @@ func (a *assembler) Assmble(o outputer) []byte {
 			panic(pkg)
 		}
 		ret = append(ret, utils.Must(ExecuteTemplate(imp, map[string]any{
-			"Import": o.Imports(),
+			"Import": utils.Uniq(o.Imports(), func(t string) string { return t }),
 		}))...)
 	}
 	return ret

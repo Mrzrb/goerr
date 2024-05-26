@@ -34,7 +34,7 @@ func (u *Unit) Output() []byte {
 	ret = append(ret, utils.Must(core.ExecuteTemplate(t, map[string]any{
 		"Name":       u.Name,
 		"Type":       u.Type,
-		"AspectType": u.Aspect.Type,
+		"AspectType": utils.OrGet(u.GetPackage() == u.Aspect.Meta().PackageName(), u.Aspect.Type, u.Aspect.Meta().PackageName()+"."+u.Aspect.Type),
 	}))...)
 
 	tM := utils.MustPointer(temp.Lookup(tplMethodName))
@@ -50,26 +50,17 @@ func (u *Unit) Output() []byte {
 			"Name":     u.Name,
 			"Type":     u.Type,
 			"FuncName": v.FuncName,
-			"Param":    v.Param,
-			// "Return":   v.Return,
+			"Param":    v.AssembleParamString(),
 			"ReturnDecl": strings.Join(utils.Map(v.Returns, func(t core.Ident) string {
 				return fmt.Sprintf("var %s %s", t.Name, t.Type)
 			}), "\n"),
-			"CallParams":         v.CallParam,
 			"Params":             v.Params,
 			"AffectedMethodName": u.AspectType,
 			"ReturnDeclNames":    v.Return,
 		}
-		retIndex := 0
-		m["Return"] = "(" + strings.Join(utils.Map(v.Returns, func(t core.Ident) string {
-			retIndex++
-			return fmt.Sprintf("ret%d %s", retIndex, t.Type)
-		}), ",") + ")"
-		retIndex = 0
-		m["ReturnVal"] = strings.Join(utils.Map(v.Returns, func(t core.Ident) string {
-			retIndex++
-			return fmt.Sprintf("ret%d", retIndex)
-		}), ",")
+		m["Return"] = v.AssembleReturnString()
+		m["CallParams"] = v.AssembleCallParamString()
+		m["ReturnVal"] = v.AssembleReturnDecl()
 		param["Methods"] = append(param["Methods"].([]map[string]any), m)
 	}
 

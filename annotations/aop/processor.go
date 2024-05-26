@@ -101,6 +101,7 @@ func (p *Processor) getUnit() []*Unit {
 				CallParam: "",
 				HasReturn: false,
 			})
+			u.BaseOutputer.Imports = append(u.BaseOutputer.Imports, m.Imports()...)
 		}
 		if len(methods) > 0 {
 			affect := utils.Filter(affects, func(m *core.Method) bool {
@@ -111,6 +112,10 @@ func (p *Processor) getUnit() []*Unit {
 			}
 			u.Affect = *affect[0]
 			u.AspectType = affects[0].Name
+			if methods[0].Meta().PackageName() != annoStruct.Meta().PackageName() {
+				// u.BaseOutputer.Imports = append(u.BaseOutputer.Imports, annoStruct.Meta().PackageName())
+				u.PushImport(annoStruct.Meta().PackageName(), annoStruct.Meta().Dir())
+			}
 		}
 
 		us = append(us, u)

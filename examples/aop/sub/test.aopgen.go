@@ -4,39 +4,40 @@
 //		go-annotation: 0.1.0
 //		aop: 0.1
 
-package main
+package sub
 
 import (
 	"github.com/Mrzrb/goerr/annotations/aop"
+	"github.com/Mrzrb/goerr/examples/aop/common"
 )
 
 type BisClientProxy struct {
 	inner  *BisClient
-	aspect *Demo
+	aspect *common.Common
 }
 
 func NewBisClientProxy(inner *BisClient) *BisClientProxy {
 	return &BisClientProxy{
 		inner:  inner,
-		aspect: &Demo{},
+		aspect: &common.Common{},
 	}
 }
 
 type BisClientInterface interface {
-	Hello() (ret1 error)
+	Hello() (ret1 int64, ret2 error)
 }
 
-func (r *BisClientProxy) Hello() (ret1 error) {
+func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
 	joint := aop.Jointcut{
 		TargetName: "BisClient",
 		TargetType: "BisClient",
 		Args:       []aop.Args{},
 		Fn: func() {
-			ret1 = r.inner.Hello()
+			ret1, ret2 = r.inner.Hello()
 		},
 	}
 
-	r.aspect.Handle(joint)
+	r.aspect.Handler(joint)
 
-	return ret1
+	return ret1, ret2
 }
