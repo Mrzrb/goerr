@@ -43,14 +43,16 @@ func (r *Two1Proxy) Hello() (ret1 int64, ret2 error) {
 }
 
 type Two2Proxy struct {
-	inner  *Two2
-	aspect *common.Common1
+	inner   *Two2
+	aspect1 *common.Common1
+	aspect  *common.Common
 }
 
 func NewTwo2Proxy(inner *Two2) *Two2Proxy {
 	return &Two2Proxy{
-		inner:  inner,
-		aspect: &common.Common1{},
+		inner:   inner,
+		aspect1: &common.Common1{},
+		aspect:  &common.Common{},
 	}
 }
 
@@ -71,7 +73,33 @@ func (r *Two2Proxy) Hello(param1 int, s1 Two1) (ret1 int64, ret2 error) {
 	joint.Args = append(joint.Args, aop.Args{Name: "param1", Type: "int", Value: param1})
 	joint.Args = append(joint.Args, aop.Args{Name: "s1", Type: "Two1", Value: s1})
 
-	r.aspect.Handler(joint)
+	f1 := func() {
+		r.aspect.Handler(joint)
+	}
+
+	f2 := warpFn(f1, r.aspect1.Handler, joint)
+
+	Warp(f1, f2)()
 
 	return ret1, ret2
+}
+
+func warpFn(fn func(), dst func(joint aop.Jointcut), joint aop.Jointcut) func() {
+	joint.Fn = func() {
+		fn()
+	}
+	return func() {
+		dst(joint)
+	}
+}
+
+func Warp(fns ...func()) func() {
+	var ret func()
+
+	for _, v := range fns {
+		ret = common.GenerateChain(func() {
+			v()
+		})
+	}
+	return ret
 }
