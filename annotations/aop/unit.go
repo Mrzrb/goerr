@@ -13,8 +13,15 @@ type Unit struct {
 	core.Struct
 	Aspect     core.Struct
 	Affect     core.Method
+	Effects    []Effect
 	AspectType string
 	Method     []core.BaseFuncOutputer
+}
+
+type Effect struct {
+	Aspect     core.Struct
+	Affect     core.Method
+	AspectType string
 }
 
 // File implements core.Outputer.
@@ -32,9 +39,14 @@ func (u *Unit) Output() []byte {
 	ret := []byte{}
 	t := utils.MustPointer(temp.Lookup(tplName))
 	ret = append(ret, utils.Must(core.ExecuteTemplate(t, map[string]any{
-		"Name":       u.Name,
-		"Type":       u.Type,
-		"AspectType": utils.OrGet(u.GetPackage() == u.Aspect.Meta().PackageName(), u.Aspect.Type, u.Aspect.Meta().PackageName()+"."+u.Aspect.Type),
+		"Name": u.Name,
+		"Type": u.Type,
+		"AspectTypeDecl": utils.MapIdx(u.Effects, func(t Effect, index int) string {
+			return "aspect" + fmt.Sprintf("%d", index) + " *" + utils.OrGet(u.GetPackage() == t.Aspect.Meta().PackageName(), t.Aspect.Type, t.Aspect.Meta().PackageName()+"."+t.Aspect.Type)
+		}),
+		"AspectTypeDeclInit": utils.MapIdx(u.Effects, func(t Effect, index int) string {
+			return "aspect" + fmt.Sprintf("%d", index) + ": &" + utils.OrGet(u.GetPackage() == t.Aspect.Meta().PackageName(), t.Aspect.Type, t.Aspect.Meta().PackageName()+"."+t.Aspect.Type) + "{}"
+		}),
 	}))...)
 
 	tM := utils.MustPointer(temp.Lookup(tplMethodName))
@@ -57,6 +69,10 @@ func (u *Unit) Output() []byte {
 			"Params":             v.Params,
 			"AffectedMethodName": u.AspectType,
 			"ReturnDeclNames":    v.Return,
+			"Effects":            u.Effects,
+			"CallJoints": utils.MapIdx(u.Effects, func(t Effect, index int) string {
+				return fmt.Sprintf("r.aspect%d.%s(j)", index, t.Affect.Name)
+			}),
 		}
 		m["Return"] = v.AssembleReturnString()
 		m["CallParams"] = v.AssembleCallParamString()

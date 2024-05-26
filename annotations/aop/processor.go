@@ -1,6 +1,8 @@
 package aop
 
 import (
+	"strings"
+
 	"github.com/Mrzrb/goerr/core"
 	"github.com/Mrzrb/goerr/utils"
 	annotation "github.com/YReshetko/go-annotation/pkg"
@@ -76,19 +78,43 @@ func (p *Processor) getUnit() []*Unit {
 			panic("num of aop point aop must be 1")
 		}
 		anno := annos[0]
-		annoStruct := core.GetByName(utils.Map(aspect, func(t *core.Struct) core.Annotated { return t }), anno.Target).(*core.Struct)
+		annoStructs := utils.Filter(aspect, func(s *core.Struct) bool {
+			return utils.Contains(strings.Split(anno.Target, ","), s.Name)
+		})
+		methods := utils.Map(core.GetMethod(utils.Map(pointCut, func(t *core.Method) core.Annotated { return t }), "*"+v.Name), func(t core.Annotated) *core.Method { return t.(*core.Method) })
 		u := &Unit{
 			BaseOutputer: core.BaseOutputer{
 				File:    v.DstFileName("aop"),
 				Imports: v.Imports(),
 				Package: v.Meta().PackageName(),
 			},
-			Struct:     *v,
-			Aspect:     *annoStruct,
-			AspectType: annoStruct.Name,
-			Method:     []core.BaseFuncOutputer{},
+			Struct: *v,
+			Method: []core.BaseFuncOutputer{},
 		}
-		methods := utils.Map(core.GetMethod(utils.Map(pointCut, func(t *core.Method) core.Annotated { return t }), "*"+v.Name), func(t core.Annotated) *core.Method { return t.(*core.Method) })
+		utils.Each(annoStructs, func(s *core.Struct) {
+			u.Effects = append(u.Effects, Effect{
+				Aspect:     *s,
+				Affect:     core.Method{},
+				AspectType: s.Name,
+			})
+			if len(methods) > 0 {
+				for k, vv := range u.Effects {
+					affect := utils.Filter(affects, func(m *core.Method) bool {
+						return m.Receiver.Type == "*"+vv.AspectType
+					})
+					if len(affect) == 0 {
+						continue
+					}
+					vv.Affect = *affect[0]
+					vv.AspectType = affects[0].Name
+					if methods[0].Meta().PackageName() != s.Meta().PackageName() {
+						// u.BaseOutputer.Imports = append(u.BaseOutputer.Imports, annoStruct.Meta().PackageName())
+						u.PushImport(s.Meta().PackageName(), s.Meta().Dir())
+					}
+					u.Effects[k] = vv
+				}
+			}
+		})
 		for _, m := range methods {
 			u.Method = append(u.Method, core.BaseFuncOutputer{
 				IsMethod:  true,
@@ -102,20 +128,6 @@ func (p *Processor) getUnit() []*Unit {
 				HasReturn: false,
 			})
 			u.BaseOutputer.Imports = append(u.BaseOutputer.Imports, m.Imports()...)
-		}
-		if len(methods) > 0 {
-			affect := utils.Filter(affects, func(m *core.Method) bool {
-				return m.Receiver.Type == "*"+u.AspectType
-			})
-			if len(affect) == 0 {
-				panic("affect must be 1")
-			}
-			u.Affect = *affect[0]
-			u.AspectType = affects[0].Name
-			if methods[0].Meta().PackageName() != annoStruct.Meta().PackageName() {
-				// u.BaseOutputer.Imports = append(u.BaseOutputer.Imports, annoStruct.Meta().PackageName())
-				u.PushImport(annoStruct.Meta().PackageName(), annoStruct.Meta().Dir())
-			}
 		}
 
 		us = append(us, u)

@@ -4,17 +4,14 @@ import (
 	"fmt"
 )
 
-// @Aop(type="point", target="Common1")
 type Two1 struct{}
 
-// @Aop(type="pointcut")
 func (b *Two1) Hello() (int64, error) {
 	fmt.Println("this is in func")
 	return 655, nil
 }
 
-// @Aop(type="point", target="Common1")
-// @Aop(type="point", target="Common")
+// @Aop(type="point", target="Common,Common1")
 type Two2 struct{}
 
 // @Aop(type="pointcut")

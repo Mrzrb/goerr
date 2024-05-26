@@ -10,13 +10,15 @@ import (
 var tpl = `
 type {{.Name}}Proxy struct {
     inner *{{.Type}}
-    aspect *{{.AspectType}}
+    {{range .AspectTypeDecl}}
+    {{.}}{{end}}
 }
 
 func New{{.Name}}Proxy(inner *{{.Type}}) *{{.Name}}Proxy {
     return &{{.Name}}Proxy {
         inner: inner,
-        aspect: &{{.AspectType}}{},
+        {{range .AspectTypeDeclInit}}
+        {{.}},{{end}}
     }
 }
 `
@@ -43,8 +45,14 @@ func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
     {{range .Params}}
     joint.Args = append(joint.Args, aop.Args{ Name : "{{.Name}}", Type: "{{.Type}}", Value: {{.Name}} }){{end}}
 
-    r.aspect.{{.AffectedMethodName}}(joint)
-
+    fn := aop.GenerateChain(joint,
+        {{range .CallJoints}}
+        func(j aop.Jointcut) {
+            {{.}}
+        },
+        {{end}}
+    )
+    fn()
     return {{.ReturnVal}}
 }{{end}}
 `

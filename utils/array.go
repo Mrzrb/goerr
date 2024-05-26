@@ -34,6 +34,21 @@ func Map[T any, R any](src []T, fn func(T) R) []R {
 	return ret
 }
 
+func MapIdx[T any, R any](src []T, fn func(T, int) R) []R {
+	var ret []R
+	for k, v := range src {
+		ret = append(ret, fn(v, k))
+	}
+
+	return ret
+}
+
+func Each[T any](src []T, fn func(T)) {
+	for _, v := range src {
+		fn(v)
+	}
+}
+
 func Walk[T any](src []T, fn func(T)) {
 	for _, v := range src {
 		fn(v)

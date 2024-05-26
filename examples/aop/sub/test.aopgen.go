@@ -12,14 +12,16 @@ import (
 )
 
 type BisClientProxy struct {
-	inner  *BisClient
-	aspect *common.Common
+	inner *BisClient
+
+	aspect0 *common.Common
 }
 
 func NewBisClientProxy(inner *BisClient) *BisClientProxy {
 	return &BisClientProxy{
-		inner:  inner,
-		aspect: &common.Common{},
+		inner: inner,
+
+		aspect0: &common.Common{},
 	}
 }
 
@@ -37,7 +39,12 @@ func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
 		},
 	}
 
-	r.aspect.Handler(joint)
+	fn := aop.GenerateChain(joint,
 
+		func(j aop.Jointcut) {
+			r.aspect0.Handler(j)
+		},
+	)
+	fn()
 	return ret1, ret2
 }
