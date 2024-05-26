@@ -11,7 +11,7 @@ func (b *Two1) Hello() (int64, error) {
 	return 655, nil
 }
 
-// @Aop(type="point", target="Common,Common1")
+// @Aop(type="point", target="Common,Common1,Logger")
 type Two2 struct{}
 
 // @Aop(type="pointcut")

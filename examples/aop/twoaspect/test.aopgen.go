@@ -16,6 +16,7 @@ type Two2Proxy struct {
 
 	aspect0 *common.Common
 	aspect1 *common.Common1
+	aspect2 *common.Logger
 }
 
 func NewTwo2Proxy(inner *Two2) *Two2Proxy {
@@ -24,6 +25,7 @@ func NewTwo2Proxy(inner *Two2) *Two2Proxy {
 
 		aspect0: &common.Common{},
 		aspect1: &common.Common1{},
+		aspect2: &common.Logger{},
 	}
 }
 
@@ -52,6 +54,10 @@ func (r *Two2Proxy) Hello(param1 int, s1 Two1) (ret1 int64, ret2 error) {
 
 		func(j aop.Jointcut) {
 			r.aspect1.Handler(j)
+		},
+
+		func(j aop.Jointcut) {
+			r.aspect2.Handler(j)
 		},
 	)
 	fn()
