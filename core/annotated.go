@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"go/ast"
 	"strings"
 
@@ -84,7 +85,7 @@ func ContainsAnnotate[T any](n Annotated) bool {
 }
 
 func GetByName(t []Annotated, name string) Annotated {
-	return utils.Filter(t, func(a Annotated) bool {
+	a := utils.Filter(t, func(a Annotated) bool {
 		n := ""
 		switch a.(type) {
 		case *Func:
@@ -95,7 +96,11 @@ func GetByName(t []Annotated, name string) Annotated {
 			n = a.(*Struct).Name
 		}
 		return n == name
-	})[0]
+	})
+	if len(a) == 0 {
+		panic(fmt.Sprintf("%s not found", name))
+	}
+	return a[0]
 }
 
 func GetMethod(t []Annotated, structName string) []Annotated {

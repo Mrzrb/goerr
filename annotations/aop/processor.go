@@ -126,7 +126,7 @@ func (p *Processor) getUnit() []*Unit {
 // Output implements annotation.AnnotationProcessor.
 func (p *Processor) Output() map[string][]byte {
 	for _, v := range p.getUnit() {
-		p.FileExporter.Append(v)
+		p.Append(v)
 	}
 	return p.Export()
 }
