@@ -26,8 +26,9 @@ type Jointcut struct {
 }
 
 type Args struct {
-	Name string
-	Type string
+	Name  string
+	Type  string
+	Value any
 }
 
 func IdentToArgs(i core.Ident) Args {

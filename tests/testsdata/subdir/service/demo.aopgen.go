@@ -25,6 +25,12 @@ func NewServiceProxy(inner *Service) *ServiceProxy {
 
 type ServiceInterface interface {
 	Hello() (ret1 error)
+
+	Hello() (ret1 error)
+
+	Hello() (ret1 error)
+
+	Hello1() (ret1 error)
 }
 
 func (r *ServiceProxy) Hello() (ret1 error) {
@@ -37,7 +43,49 @@ func (r *ServiceProxy) Hello() (ret1 error) {
 		},
 	}
 
-	r.aspect.Handle(joint)
+	r.aspect.Handler(joint)
+
+	return ret1
+}
+func (r *ServiceProxy) Hello() (ret1 error) {
+	joint := aop.Jointcut{
+		TargetName: "Service",
+		TargetType: "Service",
+		Args:       []aop.Args{},
+		Fn: func() {
+			ret1 = r.inner.Hello()
+		},
+	}
+
+	r.aspect.Handler(joint)
+
+	return ret1
+}
+func (r *ServiceProxy) Hello() (ret1 error) {
+	joint := aop.Jointcut{
+		TargetName: "Service",
+		TargetType: "Service",
+		Args:       []aop.Args{},
+		Fn: func() {
+			ret1 = r.inner.Hello()
+		},
+	}
+
+	r.aspect.Handler(joint)
+
+	return ret1
+}
+func (r *ServiceProxy) Hello1() (ret1 error) {
+	joint := aop.Jointcut{
+		TargetName: "Service",
+		TargetType: "Service",
+		Args:       []aop.Args{},
+		Fn: func() {
+			ret1 = r.inner.Hello1()
+		},
+	}
+
+	r.aspect.Handler(joint)
 
 	return ret1
 }

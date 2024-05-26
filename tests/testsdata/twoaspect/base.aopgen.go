@@ -4,21 +4,22 @@
 //		go-annotation: 0.1.0
 //		aop: 0.1
 
-package basic
+package twoaspect
 
 import (
 	"github.com/Mrzrb/goerr/annotations/aop"
+	"github.com/Mrzrb/goerr/tests/testsdata"
 )
 
 type ServiceProxy struct {
 	inner  *Service
-	aspect *BasicAspect
+	aspect *testsdata.BaseAspect
 }
 
 func NewServiceProxy(inner *Service) *ServiceProxy {
 	return &ServiceProxy{
 		inner:  inner,
-		aspect: &BasicAspect{},
+		aspect: &testsdata.BaseAspect{},
 	}
 }
 
@@ -87,4 +88,19 @@ func (r *ServiceProxy) Hello1() (ret1 error) {
 	r.aspect.Handler(joint)
 
 	return ret1
+}
+
+type Service1Proxy struct {
+	inner  *Service1
+	aspect *BaseAspect1
+}
+
+func NewService1Proxy(inner *Service1) *Service1Proxy {
+	return &Service1Proxy{
+		inner:  inner,
+		aspect: &BaseAspect1{},
+	}
+}
+
+type Service1Interface interface {
 }

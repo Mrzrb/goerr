@@ -107,7 +107,7 @@ func (p *Processor) getUnit() []*Unit {
 			affect := utils.Filter(affects, func(m *core.Method) bool {
 				return m.Receiver.Type == "*"+u.AspectType
 			})
-			if len(affect) > 1 || len(affect) == 0 {
+			if len(affect) == 0 {
 				panic("affect must be 1")
 			}
 			u.Affect = *affect[0]
