@@ -56,7 +56,7 @@ func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
 
     
     joint.Fn = func() error {
-            {{.ReturnVal}} = r.inner.{{.FuncName}}({{range $idx, $e := .Params}}mutableArgs.Args[{{$idx}}].Value.({{.Type}}),{{end}})
+            {{.ReturnValSet}} = r.inner.{{.FuncName}}({{range $idx, $e := .Params}}mutableArgs.Args[{{$idx}}].Value.({{.Type}}),{{end}})
             {{range .ErrorCheckers}}
             {{.}}{{end}}
             {{range .ResultSet}}

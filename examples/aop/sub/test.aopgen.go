@@ -67,5 +67,5 @@ func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
 		},
 	)
 	joint.Fn()
-	return ret1, ret2
+	return aop.Cast[int64](returnResult.Args[0].Value), aop.Cast[error](returnResult.Args[1].Value)
 }

@@ -82,11 +82,21 @@ func (b *BaseFuncOutputer) AssembleReturnResultAppendString() []string {
 	})
 }
 
-func (b *BaseFuncOutputer) AssembleReturnDecl() string {
+func (b *BaseFuncOutputer) AssembleReturSetDecl() string {
 	idx := 0
 	return strings.Join(utils.Map(b.Returns, func(t Ident) string {
 		idx++
-		return fmt.Sprintf("ret%d", idx)
+		return fmt.Sprintf(" ret%d", idx)
+	}), ",")
+}
+
+func (b *BaseFuncOutputer) AssembleReturnDecl() string {
+	idx := 0
+
+	return strings.Join(utils.Map(b.Returns, func(t Ident) string {
+		s := fmt.Sprintf("aop.Cast[%s](returnResult.Args[%d].Value)", t.Type, idx)
+		idx++
+		return s
 	}), ",")
 }
 

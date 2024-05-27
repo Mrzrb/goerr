@@ -12,3 +12,12 @@ func GenerateChain(joint *Jointcut, m *RunContext, chain ...func(Jointcut, *RunC
 		joint.Fn = generateChain(joint.Fn, v, *joint, m)
 	}
 }
+
+func Cast[T any](src any) T {
+	if v, ok := src.(T); ok {
+		return v
+	}
+
+	var vv T
+	return vv
+}
