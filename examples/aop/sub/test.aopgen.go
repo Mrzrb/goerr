@@ -37,20 +37,32 @@ func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
 		Args:       []aop.Args{},
 	}
 
+	runContext := aop.RunContext{}
+	returnResult := aop.ReturnResult{}
+
+	returnResult.Args = append(returnResult.Args, &aop.Args{Name: "", Type: "int64", Value: ret1})
+	returnResult.Args = append(returnResult.Args, &aop.Args{Name: "", Type: "error", Value: ret2})
+
 	mutableArgs := aop.MuteableArgs{}
+
+	runContext.MuteableArgs = mutableArgs
+	runContext.ReturnResult = returnResult
 
 	joint.Fn = func() error {
 		ret1, ret2 = r.inner.Hello()
 
-		if "error" == "error" {
+		if "error" == "error" && ret2 != nil {
 			return ret2
 		}
+
+		runContext.ReturnResult.Args[0].Value = ret1
+		runContext.ReturnResult.Args[1].Value = ret2
 		return nil
 	}
 
-	aop.GenerateChain(&joint, mutableArgs,
+	aop.GenerateChain(&joint, &runContext,
 
-		func(j aop.Jointcut, m aop.MuteableArgs) error {
+		func(j aop.Jointcut, m *aop.RunContext) error {
 			return r.aspect0.Handler(j, m)
 		},
 	)

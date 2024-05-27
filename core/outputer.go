@@ -73,6 +73,15 @@ func (b *BaseFuncOutputer) AssembleReturnString() string {
 	}), ",") + ")"
 }
 
+func (b *BaseFuncOutputer) AssembleReturnResultAppendString() []string {
+	idx := 0
+	return utils.Map(b.Returns, func(t Ident) string {
+		idx++
+		return fmt.Sprintf(`returnResult.Args = append(returnResult.Args, &aop.Args{Name:"%s",Type:"%s",Value:ret%d})`, t.Name, t.Type, idx)
+		// return fmt.Sprintf("ret%d %s", idx, t.Type)
+	})
+}
+
 func (b *BaseFuncOutputer) AssembleReturnDecl() string {
 	idx := 0
 	return strings.Join(utils.Map(b.Returns, func(t Ident) string {
@@ -81,13 +90,22 @@ func (b *BaseFuncOutputer) AssembleReturnDecl() string {
 	}), ",")
 }
 
+func (b *BaseFuncOutputer) AssembleResultSetString() []string {
+	idx := 0
+	return utils.Map(b.Returns, func(t Ident) string {
+		s := fmt.Sprintf(`runContext.ReturnResult.Args[%d].Value = ret%d`, idx, idx+1)
+		idx++
+		return s
+	})
+}
+
 func (b *BaseFuncOutputer) AssembleErrorCheckers() []string {
 	idx := 0
 	return utils.Map(b.Returns, func(t Ident) string {
 		idx++
-		return utils.OrGet(t.Type == "error", fmt.Sprintf(`if "%s" == "error" {
+		return utils.OrGet(t.Type == "error", fmt.Sprintf(`if "%s" == "error" && ret%d != nil {
             return ret%d
-        }`, t.Type, idx), "")
+        }`, t.Type, idx, idx), "")
 		// return fmt.Sprintf(`if "%s" == "error" {
 		//           %s
 		//       }`, t.Type, utils.OrGet(t.Type == "error", fmt.Sprintf("return ret%d", idx), ""))

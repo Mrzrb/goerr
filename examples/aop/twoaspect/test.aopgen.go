@@ -40,23 +40,34 @@ func (r *Two2Proxy) Hello(param1 int, s1 *Two1) (ret1 int64, ret2 error) {
 	joint.Args = append(joint.Args, aop.Args{Name: "param1", Type: "int", Value: param1})
 	joint.Args = append(joint.Args, aop.Args{Name: "s1", Type: "*Two1", Value: s1})
 
+	runContext := aop.RunContext{}
+	returnResult := aop.ReturnResult{}
+
+	returnResult.Args = append(returnResult.Args, &aop.Args{Name: "", Type: "int64", Value: ret1})
+	returnResult.Args = append(returnResult.Args, &aop.Args{Name: "", Type: "error", Value: ret2})
+
 	mutableArgs := aop.MuteableArgs{}
 
 	mutableArgs.Args = append(mutableArgs.Args, &joint.Args[0])
 	mutableArgs.Args = append(mutableArgs.Args, &joint.Args[1])
+	runContext.MuteableArgs = mutableArgs
+	runContext.ReturnResult = returnResult
 
 	joint.Fn = func() error {
 		ret1, ret2 = r.inner.Hello(mutableArgs.Args[0].Value.(int), mutableArgs.Args[1].Value.(*Two1))
 
-		if "error" == "error" {
+		if "error" == "error" && ret2 != nil {
 			return ret2
 		}
+
+		runContext.ReturnResult.Args[0].Value = ret1
+		runContext.ReturnResult.Args[1].Value = ret2
 		return nil
 	}
 
-	aop.GenerateChain(&joint, mutableArgs,
+	aop.GenerateChain(&joint, &runContext,
 
-		func(j aop.Jointcut, m aop.MuteableArgs) error {
+		func(j aop.Jointcut, m *aop.RunContext) error {
 			return r.aspect0.Handler(j, m)
 		},
 	)

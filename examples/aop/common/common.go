@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/Mrzrb/goerr/annotations/aop"
 )
@@ -35,15 +34,10 @@ func (c *Common1) Handler(joint aop.Jointcut) (err error) {
 type Logger struct{}
 
 // @Aop(type="around")
-func (c *Logger) Handler(joint aop.Jointcut, param aop.MuteableArgs) (err error) {
-	now := time.Now().Unix()
-	param.Args[0].Value = 55
-	fmt.Printf("start exec in %d", now)
-	defer func() {
-		stop := time.Now().Unix()
-		fmt.Printf("end exec in %d, duration %d", stop, stop-now)
-	}()
+func (c *Logger) Handler(joint aop.Jointcut, param *aop.RunContext) (err error) {
+	param.MuteableArgs.Args[0].Value = 55
 	err = joint.Fn()
+	fmt.Printf("\nresult: %+v %+v\n", param.ReturnResult.Args[0], param.ReturnResult.Args[1])
 	if err != nil {
 		panic(err)
 	}

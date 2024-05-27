@@ -17,5 +17,6 @@ type Two2 struct{}
 // @Aop(type="pointcut")
 func (b *Two2) Hello(param1 int, s1 *Two1) (int64, error) {
 	fmt.Printf("param is param1: %d, s1: %+v", param1, s1)
+	param1 += 4
 	return int64(param1), nil
 }

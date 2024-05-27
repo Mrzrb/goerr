@@ -26,7 +26,16 @@ type Jointcut struct {
 	Fn func() error
 }
 
+type RunContext struct {
+	MuteableArgs
+	ReturnResult
+}
+
 type MuteableArgs struct {
+	Args []*Args
+}
+
+type ReturnResult struct {
 	Args []*Args
 }
 

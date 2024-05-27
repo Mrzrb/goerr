@@ -75,8 +75,10 @@ func (u *Unit) Output() []byte {
 			}),
 		}
 		m["Return"] = v.AssembleReturnString()
+		m["ResultAppend"] = v.AssembleReturnResultAppendString()
 		m["CallParams"] = v.AssembleCallParamString()
 		m["ReturnVal"] = v.AssembleReturnDecl()
+		m["ResultSet"] = v.AssembleResultSetString()
 		m["ErrorCheckers"] = v.AssembleErrorCheckers()
 		param["Methods"] = append(param["Methods"].([]map[string]any), m)
 	}
