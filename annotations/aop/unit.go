@@ -71,7 +71,7 @@ func (u *Unit) Output() []byte {
 			"ReturnDeclNames":    v.Return,
 			"Effects":            u.Effects,
 			"CallJoints": utils.MapIdx(u.Effects, func(t Effect, index int) string {
-				return fmt.Sprintf("r.aspect%d.%s(j)", index, t.Affect.Name)
+				return fmt.Sprintf("r.aspect%d.%s(j, m)", index, t.Affect.Name)
 			}),
 		}
 		m["Return"] = v.AssembleReturnString()

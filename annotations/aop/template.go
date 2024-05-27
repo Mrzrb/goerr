@@ -39,24 +39,29 @@ func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
 		TargetType: "{{.Type}}",
         MethodName: "{{.FuncName}}",
 		Args:       []aop.Args{},
-		Fn: func() error {
-            {{.ReturnVal}} = r.inner.{{.FuncName}}({{.CallParams}})
-            {{range .ErrorCheckers}}
-            {{.}}{{end}}
-            return nil
-		},
 	}
     {{range .Params}}
     joint.Args = append(joint.Args, aop.Args{ Name : "{{.Name}}", Type: "{{.Type}}", Value: {{.Name}} }){{end}}
 
-    fn := aop.GenerateChain(joint,
+    mutableArgs := aop.MuteableArgs{}
+    {{range $idx, $e := .Params}}
+    mutableArgs.Args = append(mutableArgs.Args, &joint.Args[{{$idx}}]){{end}}
+
+    joint.Fn = func() error {
+            {{.ReturnVal}} = r.inner.{{.FuncName}}({{range $idx, $e := .Params}}mutableArgs.Args[{{$idx}}].Value.({{.Type}}),{{end}})
+            {{range .ErrorCheckers}}
+            {{.}}{{end}}
+            return nil
+    }
+
+    aop.GenerateChain(&joint,mutableArgs,
         {{range .CallJoints}}
-        func(j aop.Jointcut) error {
+        func(j aop.Jointcut, m aop.MuteableArgs) error {
             return {{.}}
         },
         {{end}}
     )
-    fn()
+    joint.Fn()
     return {{.ReturnVal}}
 }{{end}}
 `

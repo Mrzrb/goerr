@@ -35,22 +35,25 @@ func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
 		TargetType: "BisClient",
 		MethodName: "Hello",
 		Args:       []aop.Args{},
-		Fn: func() error {
-			ret1, ret2 = r.inner.Hello()
-
-			if "error" == "error" {
-				return ret2
-			}
-			return nil
-		},
 	}
 
-	fn := aop.GenerateChain(joint,
+	mutableArgs := aop.MuteableArgs{}
 
-		func(j aop.Jointcut) error {
-			return r.aspect0.Handler(j)
+	joint.Fn = func() error {
+		ret1, ret2 = r.inner.Hello()
+
+		if "error" == "error" {
+			return ret2
+		}
+		return nil
+	}
+
+	aop.GenerateChain(&joint, mutableArgs,
+
+		func(j aop.Jointcut, m aop.MuteableArgs) error {
+			return r.aspect0.Handler(j, m)
 		},
 	)
-	fn()
+	joint.Fn()
 	return ret1, ret2
 }

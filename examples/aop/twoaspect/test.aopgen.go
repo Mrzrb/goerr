@@ -14,58 +14,52 @@ import (
 type Two2Proxy struct {
 	inner *Two2
 
-	aspect0 *common.Common
-	aspect1 *common.Common1
-	aspect2 *common.Logger
+	aspect0 *common.Logger
 }
 
 func NewTwo2Proxy(inner *Two2) *Two2Proxy {
 	return &Two2Proxy{
 		inner: inner,
 
-		aspect0: &common.Common{},
-		aspect1: &common.Common1{},
-		aspect2: &common.Logger{},
+		aspect0: &common.Logger{},
 	}
 }
 
 type Two2Interface interface {
-	Hello(param1 int, s1 Two1) (ret1 int64, ret2 error)
+	Hello(param1 int, s1 *Two1) (ret1 int64, ret2 error)
 }
 
-func (r *Two2Proxy) Hello(param1 int, s1 Two1) (ret1 int64, ret2 error) {
+func (r *Two2Proxy) Hello(param1 int, s1 *Two1) (ret1 int64, ret2 error) {
 	joint := aop.Jointcut{
 		TargetName: "Two2",
 		TargetType: "Two2",
 		MethodName: "Hello",
 		Args:       []aop.Args{},
-		Fn: func() error {
-			ret1, ret2 = r.inner.Hello(param1, s1)
-
-			if "error" == "error" {
-				return ret2
-			}
-			return nil
-		},
 	}
 
 	joint.Args = append(joint.Args, aop.Args{Name: "param1", Type: "int", Value: param1})
-	joint.Args = append(joint.Args, aop.Args{Name: "s1", Type: "Two1", Value: s1})
+	joint.Args = append(joint.Args, aop.Args{Name: "s1", Type: "*Two1", Value: s1})
 
-	fn := aop.GenerateChain(joint,
+	mutableArgs := aop.MuteableArgs{}
 
-		func(j aop.Jointcut) error {
-			return r.aspect0.Handler(j)
-		},
+	mutableArgs.Args = append(mutableArgs.Args, &joint.Args[0])
+	mutableArgs.Args = append(mutableArgs.Args, &joint.Args[1])
 
-		func(j aop.Jointcut) error {
-			return r.aspect1.Handler(j)
-		},
+	joint.Fn = func() error {
+		ret1, ret2 = r.inner.Hello(mutableArgs.Args[0].Value.(int), mutableArgs.Args[1].Value.(*Two1))
 
-		func(j aop.Jointcut) error {
-			return r.aspect2.Handler(j)
+		if "error" == "error" {
+			return ret2
+		}
+		return nil
+	}
+
+	aop.GenerateChain(&joint, mutableArgs,
+
+		func(j aop.Jointcut, m aop.MuteableArgs) error {
+			return r.aspect0.Handler(j, m)
 		},
 	)
-	fn()
+	joint.Fn()
 	return ret1, ret2
 }
