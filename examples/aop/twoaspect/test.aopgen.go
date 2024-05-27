@@ -37,9 +37,15 @@ func (r *Two2Proxy) Hello(param1 int, s1 Two1) (ret1 int64, ret2 error) {
 	joint := aop.Jointcut{
 		TargetName: "Two2",
 		TargetType: "Two2",
+		MethodName: "Hello",
 		Args:       []aop.Args{},
-		Fn: func() {
+		Fn: func() error {
 			ret1, ret2 = r.inner.Hello(param1, s1)
+
+			if "error" == "error" {
+				return ret2
+			}
+			return nil
 		},
 	}
 
@@ -48,16 +54,16 @@ func (r *Two2Proxy) Hello(param1 int, s1 Two1) (ret1 int64, ret2 error) {
 
 	fn := aop.GenerateChain(joint,
 
-		func(j aop.Jointcut) {
-			r.aspect0.Handler(j)
+		func(j aop.Jointcut) error {
+			return r.aspect0.Handler(j)
 		},
 
-		func(j aop.Jointcut) {
-			r.aspect1.Handler(j)
+		func(j aop.Jointcut) error {
+			return r.aspect1.Handler(j)
 		},
 
-		func(j aop.Jointcut) {
-			r.aspect2.Handler(j)
+		func(j aop.Jointcut) error {
+			return r.aspect2.Handler(j)
 		},
 	)
 	fn()

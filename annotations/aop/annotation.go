@@ -19,10 +19,11 @@ const (
 type Jointcut struct {
 	TargetName string
 	TargetType string
+	MethodName string
 	// args
 	Args []Args
 	// warp process
-	Fn func()
+	Fn func() error
 }
 
 type Args struct {

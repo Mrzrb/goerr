@@ -37,9 +37,13 @@ func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
 	joint := aop.Jointcut{
 		TargetName: "{{.Name}}",
 		TargetType: "{{.Type}}",
+        MethodName: "{{.FuncName}}",
 		Args:       []aop.Args{},
-		Fn: func() {
+		Fn: func() error {
             {{.ReturnVal}} = r.inner.{{.FuncName}}({{.CallParams}})
+            {{range .ErrorCheckers}}
+            {{.}}{{end}}
+            return nil
 		},
 	}
     {{range .Params}}
@@ -47,8 +51,8 @@ func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
 
     fn := aop.GenerateChain(joint,
         {{range .CallJoints}}
-        func(j aop.Jointcut) {
-            {{.}}
+        func(j aop.Jointcut) error {
+            return {{.}}
         },
         {{end}}
     )

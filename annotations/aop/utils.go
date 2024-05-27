@@ -1,16 +1,16 @@
 package aop
 
-func generateChain(raw func(), effect func(Jointcut), joint Jointcut) func() {
+func generateChain(raw func() error, effect func(Jointcut) error, joint Jointcut) func() error {
 	joint.Fn = raw
 
-	return func() {
-		effect(joint)
+	return func() error {
+		return effect(joint)
 	}
 }
 
-func GenerateChain(joint Jointcut, chain ...func(Jointcut)) func() {
-	fn := func() {
-		joint.Fn()
+func GenerateChain(joint Jointcut, chain ...func(Jointcut) error) func() error {
+	fn := func() error {
+		return joint.Fn()
 	}
 
 	for _, v := range chain {

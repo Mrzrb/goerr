@@ -9,17 +9,22 @@ package twoaspect
 import (
 	"github.com/Mrzrb/goerr/annotations/aop"
 	"github.com/Mrzrb/goerr/tests/testsdata"
+	"twoaspect"
 )
 
 type ServiceProxy struct {
-	inner  *Service
-	aspect *testsdata.BaseAspect
+	inner *Service
+
+	aspect0 *testsdata.BaseAspect
+	aspect1 *BaseAspect
 }
 
 func NewServiceProxy(inner *Service) *ServiceProxy {
 	return &ServiceProxy{
-		inner:  inner,
-		aspect: &testsdata.BaseAspect{},
+		inner: inner,
+
+		aspect0: &testsdata.BaseAspect{},
+		aspect1: &BaseAspect{},
 	}
 }
 
@@ -37,68 +42,110 @@ func (r *ServiceProxy) Hello() (ret1 error) {
 	joint := aop.Jointcut{
 		TargetName: "Service",
 		TargetType: "Service",
+		MethodName: "Hello",
 		Args:       []aop.Args{},
 		Fn: func() {
 			ret1 = r.inner.Hello()
 		},
 	}
 
-	r.aspect.Handler(joint)
+	fn := aop.GenerateChain(joint,
 
+		func(j aop.Jointcut) {
+			r.aspect0.Handle(j)
+		},
+
+		func(j aop.Jointcut) {
+			r.aspect1.Handle(j)
+		},
+	)
+	fn()
 	return ret1
 }
 func (r *ServiceProxy) Hello() (ret1 error) {
 	joint := aop.Jointcut{
 		TargetName: "Service",
 		TargetType: "Service",
+		MethodName: "Hello",
 		Args:       []aop.Args{},
 		Fn: func() {
 			ret1 = r.inner.Hello()
 		},
 	}
 
-	r.aspect.Handler(joint)
+	fn := aop.GenerateChain(joint,
 
+		func(j aop.Jointcut) {
+			r.aspect0.Handle(j)
+		},
+
+		func(j aop.Jointcut) {
+			r.aspect1.Handle(j)
+		},
+	)
+	fn()
 	return ret1
 }
 func (r *ServiceProxy) Hello() (ret1 error) {
 	joint := aop.Jointcut{
 		TargetName: "Service",
 		TargetType: "Service",
+		MethodName: "Hello",
 		Args:       []aop.Args{},
 		Fn: func() {
 			ret1 = r.inner.Hello()
 		},
 	}
 
-	r.aspect.Handler(joint)
+	fn := aop.GenerateChain(joint,
 
+		func(j aop.Jointcut) {
+			r.aspect0.Handle(j)
+		},
+
+		func(j aop.Jointcut) {
+			r.aspect1.Handle(j)
+		},
+	)
+	fn()
 	return ret1
 }
 func (r *ServiceProxy) Hello1() (ret1 error) {
 	joint := aop.Jointcut{
 		TargetName: "Service",
 		TargetType: "Service",
+		MethodName: "Hello1",
 		Args:       []aop.Args{},
 		Fn: func() {
 			ret1 = r.inner.Hello1()
 		},
 	}
 
-	r.aspect.Handler(joint)
+	fn := aop.GenerateChain(joint,
 
+		func(j aop.Jointcut) {
+			r.aspect0.Handle(j)
+		},
+
+		func(j aop.Jointcut) {
+			r.aspect1.Handle(j)
+		},
+	)
+	fn()
 	return ret1
 }
 
 type Service1Proxy struct {
-	inner  *Service1
-	aspect *BaseAspect1
+	inner *Service1
+
+	aspect0 *BaseAspect1
 }
 
 func NewService1Proxy(inner *Service1) *Service1Proxy {
 	return &Service1Proxy{
-		inner:  inner,
-		aspect: &BaseAspect1{},
+		inner: inner,
+
+		aspect0: &BaseAspect1{},
 	}
 }
 

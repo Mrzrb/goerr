@@ -77,6 +77,7 @@ func (u *Unit) Output() []byte {
 		m["Return"] = v.AssembleReturnString()
 		m["CallParams"] = v.AssembleCallParamString()
 		m["ReturnVal"] = v.AssembleReturnDecl()
+		m["ErrorCheckers"] = v.AssembleErrorCheckers()
 		param["Methods"] = append(param["Methods"].([]map[string]any), m)
 	}
 
@@ -92,8 +93,18 @@ func (u *Unit) Package() string {
 }
 
 // Valid implements core.Outputer.
-func (u *Unit) Valid() bool {
-	return true
+func (u *Unit) Valid() error {
+	for _, v := range u.Effects {
+		if len(v.Affect.Retern) != 1 {
+			return fmt.Errorf("affect must return error, Aspect %s", v.Aspect.Name)
+		}
+		for _, vv := range v.Affect.Retern {
+			if vv.Type != "error" {
+				return fmt.Errorf("affect must return error, actual return %s, Aspect %s", vv.Type, v.Aspect.Name)
+			}
+		}
+	}
+	return nil
 }
 
 var _ core.Outputer = (*Unit)(nil)

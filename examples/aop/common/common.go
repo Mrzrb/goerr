@@ -11,20 +11,23 @@ import (
 type Common struct{}
 
 // @Aop(type="around")
-func (c *Common) Handler(joint aop.Jointcut) {
+func (c *Common) Handler(joint aop.Jointcut) error {
+	var err error
 	fmt.Println("coomon enter")
-	joint.Fn()
+	err = joint.Fn()
 	fmt.Println("coomon exit")
+	return err
 }
 
 // @Aop(type="aspect")
 type Common1 struct{}
 
 // @Aop(type="around")
-func (c *Common1) Handler(joint aop.Jointcut) {
+func (c *Common1) Handler(joint aop.Jointcut) (err error) {
 	fmt.Println("coomon1 enter")
-	joint.Fn()
+	err = joint.Fn()
 	fmt.Println("coomon1 exit")
+	return err
 }
 
 func GenerateChain(fn func()) func() {
@@ -37,13 +40,17 @@ func GenerateChain(fn func()) func() {
 type Logger struct{}
 
 // @Aop(type="around")
-func (c *Logger) Handler(joint aop.Jointcut) {
+func (c *Logger) Handler(joint aop.Jointcut) (err error) {
 	now := time.Now().Unix()
 	fmt.Printf("start exec in %d", now)
 	defer func() {
 		stop := time.Now().Unix()
 		fmt.Printf("end exec in %d, duration %d", stop, stop-now)
 	}()
-	joint.Fn()
+	err = joint.Fn()
 	time.Sleep(time.Second)
+	if err != nil {
+		panic(err)
+	}
+	return err
 }

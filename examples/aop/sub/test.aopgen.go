@@ -33,16 +33,22 @@ func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
 	joint := aop.Jointcut{
 		TargetName: "BisClient",
 		TargetType: "BisClient",
+		MethodName: "Hello",
 		Args:       []aop.Args{},
-		Fn: func() {
+		Fn: func() error {
 			ret1, ret2 = r.inner.Hello()
+
+			if "error" == "error" {
+				return ret2
+			}
+			return nil
 		},
 	}
 
 	fn := aop.GenerateChain(joint,
 
-		func(j aop.Jointcut) {
-			r.aspect0.Handler(j)
+		func(j aop.Jointcut) error {
+			return r.aspect0.Handler(j)
 		},
 	)
 	fn()

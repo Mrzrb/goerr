@@ -14,7 +14,7 @@ type Outputer interface {
 }
 
 type outputer interface {
-	Valid() bool
+	Valid() error
 	Output() []byte
 	Imports() []string
 	Package() string
@@ -81,6 +81,19 @@ func (b *BaseFuncOutputer) AssembleReturnDecl() string {
 	}), ",")
 }
 
+func (b *BaseFuncOutputer) AssembleErrorCheckers() []string {
+	idx := 0
+	return utils.Map(b.Returns, func(t Ident) string {
+		idx++
+		return utils.OrGet(t.Type == "error", fmt.Sprintf(`if "%s" == "error" {
+            return ret%d
+        }`, t.Type, idx), "")
+		// return fmt.Sprintf(`if "%s" == "error" {
+		//           %s
+		//       }`, t.Type, utils.OrGet(t.Type == "error", fmt.Sprintf("return ret%d", idx), ""))
+	})
+}
+
 // @Constructor
 type exporter struct {
 	Files     []Outputer // @Init
@@ -132,8 +145,8 @@ func (e *exporter) Export() map[string][]byte {
 				ret[f] = append(ret[f], e.Assembler.Assmble(v)...)
 				e.cache[f] = 1
 			}
-			if !v.Valid() {
-				panic(fmt.Sprintf("param not valid %+v", v))
+			if err := v.Valid(); err != nil {
+				panic(fmt.Sprintf("param not valid %s", err))
 			}
 			ret[f] = append(ret[f], v.Output()...)
 		}

@@ -1,6 +1,7 @@
 package twoaspect
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -17,5 +18,5 @@ type Two2 struct{}
 // @Aop(type="pointcut")
 func (b *Two2) Hello(param1 int, s1 Two1) (int64, error) {
 	fmt.Println("this is in func")
-	return 655, nil
+	return 655, errors.New("ts fail")
 }
