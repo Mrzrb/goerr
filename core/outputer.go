@@ -113,9 +113,9 @@ func (b *BaseFuncOutputer) AssembleErrorCheckers() []string {
 	idx := 0
 	return utils.Map(b.Returns, func(t Ident) string {
 		idx++
-		return utils.OrGet(t.Type == "error", fmt.Sprintf(`if "%s" == "error" && ret%d != nil {
+		return utils.OrGet(t.Type == "error", fmt.Sprintf(`if ret%d != nil {
             return ret%d
-        }`, t.Type, idx, idx), "")
+        }`, idx, idx), "")
 		// return fmt.Sprintf(`if "%s" == "error" {
 		//           %s
 		//       }`, t.Type, utils.OrGet(t.Type == "error", fmt.Sprintf("return ret%d", idx), ""))
