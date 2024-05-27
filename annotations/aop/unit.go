@@ -31,7 +31,7 @@ func (u *Unit) File() string {
 
 // Imports implements core.Outputer.
 func (u *Unit) Imports() []string {
-	return append(u.GetImports(), "github.com/Mrzrb/goerr/annotations/aop")
+	return append(u.GetImports(), "github.com/Mrzrb/goerr/annotations/aop_core")
 }
 
 // Output implements core.Outputer.

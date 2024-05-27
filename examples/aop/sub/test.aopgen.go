@@ -7,7 +7,7 @@
 package sub
 
 import (
-	"github.com/Mrzrb/goerr/annotations/aop"
+	"github.com/Mrzrb/goerr/annotations/aop_core"
 	"github.com/Mrzrb/goerr/examples/aop/common"
 )
 
@@ -30,20 +30,20 @@ type BisClientInterface interface {
 }
 
 func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
-	joint := aop.Jointcut{
+	joint := aop_core.Jointcut{
 		TargetName: "BisClient",
 		TargetType: "BisClient",
 		MethodName: "Hello",
-		Args:       []aop.Args{},
+		Args:       []aop_core.Args{},
 	}
 
-	runContext := aop.RunContext{}
-	returnResult := aop.ReturnResult{}
+	runContext := aop_core.RunContext{}
+	returnResult := aop_core.ReturnResult{}
 
-	returnResult.Args = append(returnResult.Args, &aop.Args{Name: "", Type: "int64", Value: ret1})
-	returnResult.Args = append(returnResult.Args, &aop.Args{Name: "", Type: "error", Value: ret2})
+	returnResult.Args = append(returnResult.Args, &aop_core.Args{Name: "", Type: "int64", Value: ret1})
+	returnResult.Args = append(returnResult.Args, &aop_core.Args{Name: "", Type: "error", Value: ret2})
 
-	mutableArgs := aop.MuteableArgs{}
+	mutableArgs := aop_core.MuteableArgs{}
 
 	runContext.MuteableArgs = mutableArgs
 	runContext.ReturnResult = returnResult
@@ -51,7 +51,7 @@ func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
 	joint.Fn = func() error {
 		ret1, ret2 = r.inner.Hello()
 
-		if "error" == "error" && ret2 != nil {
+		if ret2 != nil {
 			return ret2
 		}
 
@@ -60,12 +60,12 @@ func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
 		return nil
 	}
 
-	aop.GenerateChain(&joint, &runContext,
+	aop_core.GenerateChain(&joint, &runContext,
 
-		func(j aop.Jointcut, m *aop.RunContext) error {
+		func(j aop_core.Jointcut, m *aop_core.RunContext) error {
 			return r.aspect0.Handler(j, m)
 		},
 	)
 	joint.Fn()
-	return aop.Cast[int64](returnResult.Args[0].Value), aop.Cast[error](returnResult.Args[1].Value)
+	return aop_core.Cast[int64](returnResult.Args[0].Value), aop_core.Cast[error](returnResult.Args[1].Value)
 }

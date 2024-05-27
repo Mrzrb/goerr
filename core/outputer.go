@@ -77,7 +77,7 @@ func (b *BaseFuncOutputer) AssembleReturnResultAppendString() []string {
 	idx := 0
 	return utils.Map(b.Returns, func(t Ident) string {
 		idx++
-		return fmt.Sprintf(`returnResult.Args = append(returnResult.Args, &aop.Args{Name:"%s",Type:"%s",Value:ret%d})`, t.Name, t.Type, idx)
+		return fmt.Sprintf(`returnResult.Args = append(returnResult.Args, &aop_core.Args{Name:"%s",Type:"%s",Value:ret%d})`, t.Name, t.Type, idx)
 		// return fmt.Sprintf("ret%d %s", idx, t.Type)
 	})
 }
@@ -94,7 +94,7 @@ func (b *BaseFuncOutputer) AssembleReturnDecl() string {
 	idx := 0
 
 	return strings.Join(utils.Map(b.Returns, func(t Ident) string {
-		s := fmt.Sprintf("aop.Cast[%s](returnResult.Args[%d].Value)", t.Type, idx)
+		s := fmt.Sprintf("aop_core.Cast[%s](returnResult.Args[%d].Value)", t.Type, idx)
 		idx++
 		return s
 	}), ",")

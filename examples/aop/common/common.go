@@ -3,14 +3,14 @@ package common
 import (
 	"fmt"
 
-	"github.com/Mrzrb/goerr/annotations/aop"
+	"github.com/Mrzrb/goerr/annotations/aop_core"
 )
 
 // @Aop(type="aspect")
 type Common struct{}
 
 // @Aop(type="around")
-func (c *Common) Handler(joint aop.Jointcut) error {
+func (c *Common) Handler(joint aop_core.Jointcut) error {
 	var err error
 	joint.Args[0].Value = 555
 	fmt.Println("coomon enter")
@@ -23,7 +23,7 @@ func (c *Common) Handler(joint aop.Jointcut) error {
 type Common1 struct{}
 
 // @Aop(type="around")
-func (c *Common1) Handler(joint aop.Jointcut) (err error) {
+func (c *Common1) Handler(joint aop_core.Jointcut) (err error) {
 	fmt.Println("coomon1 enter")
 	err = joint.Fn()
 	fmt.Println("coomon1 exit")
@@ -34,7 +34,7 @@ func (c *Common1) Handler(joint aop.Jointcut) (err error) {
 type Logger struct{}
 
 // @Aop(type="around")
-func (c *Logger) Handler(joint aop.Jointcut, param *aop.RunContext) (err error) {
+func (c *Logger) Handler(joint aop_core.Jointcut, param *aop_core.RunContext) (err error) {
 	param.MuteableArgs.Args[0].Value = 55
 	err = joint.Fn()
 	fmt.Printf("\nresult: %+v %+v\n", param.ReturnResult.Args[0], param.ReturnResult.Args[1])

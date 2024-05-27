@@ -1,4 +1,4 @@
-package aop
+package aop_core
 
 func generateChain(raw func() error, effect func(Jointcut, *RunContext) error, joint Jointcut, m *RunContext) func() error {
 	joint.Fn = raw

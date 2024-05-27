@@ -7,7 +7,7 @@
 package twoaspect
 
 import (
-	"github.com/Mrzrb/goerr/annotations/aop"
+	"github.com/Mrzrb/goerr/annotations/aop_core"
 	"github.com/Mrzrb/goerr/examples/aop/common"
 )
 
@@ -30,23 +30,23 @@ type Two2Interface interface {
 }
 
 func (r *Two2Proxy) Hello(param1 int, s1 *Two1) (ret1 int64, ret2 error) {
-	joint := aop.Jointcut{
+	joint := aop_core.Jointcut{
 		TargetName: "Two2",
 		TargetType: "Two2",
 		MethodName: "Hello",
-		Args:       []aop.Args{},
+		Args:       []aop_core.Args{},
 	}
 
-	joint.Args = append(joint.Args, aop.Args{Name: "param1", Type: "int", Value: param1})
-	joint.Args = append(joint.Args, aop.Args{Name: "s1", Type: "*Two1", Value: s1})
+	joint.Args = append(joint.Args, aop_core.Args{Name: "param1", Type: "int", Value: param1})
+	joint.Args = append(joint.Args, aop_core.Args{Name: "s1", Type: "*Two1", Value: s1})
 
-	runContext := aop.RunContext{}
-	returnResult := aop.ReturnResult{}
+	runContext := aop_core.RunContext{}
+	returnResult := aop_core.ReturnResult{}
 
-	returnResult.Args = append(returnResult.Args, &aop.Args{Name: "", Type: "int64", Value: ret1})
-	returnResult.Args = append(returnResult.Args, &aop.Args{Name: "", Type: "error", Value: ret2})
+	returnResult.Args = append(returnResult.Args, &aop_core.Args{Name: "", Type: "int64", Value: ret1})
+	returnResult.Args = append(returnResult.Args, &aop_core.Args{Name: "", Type: "error", Value: ret2})
 
-	mutableArgs := aop.MuteableArgs{}
+	mutableArgs := aop_core.MuteableArgs{}
 
 	mutableArgs.Args = append(mutableArgs.Args, &joint.Args[0])
 	mutableArgs.Args = append(mutableArgs.Args, &joint.Args[1])
@@ -56,7 +56,7 @@ func (r *Two2Proxy) Hello(param1 int, s1 *Two1) (ret1 int64, ret2 error) {
 	joint.Fn = func() error {
 		ret1, ret2 = r.inner.Hello(mutableArgs.Args[0].Value.(int), mutableArgs.Args[1].Value.(*Two1))
 
-		if "error" == "error" && ret2 != nil {
+		if ret2 != nil {
 			return ret2
 		}
 
@@ -65,12 +65,12 @@ func (r *Two2Proxy) Hello(param1 int, s1 *Two1) (ret1 int64, ret2 error) {
 		return nil
 	}
 
-	aop.GenerateChain(&joint, &runContext,
+	aop_core.GenerateChain(&joint, &runContext,
 
-		func(j aop.Jointcut, m *aop.RunContext) error {
+		func(j aop_core.Jointcut, m *aop_core.RunContext) error {
 			return r.aspect0.Handler(j, m)
 		},
 	)
 	joint.Fn()
-	return aop.Cast[int64](returnResult.Args[0].Value), aop.Cast[error](returnResult.Args[1].Value)
+	return aop_core.Cast[int64](returnResult.Args[0].Value), aop_core.Cast[error](returnResult.Args[1].Value)
 }

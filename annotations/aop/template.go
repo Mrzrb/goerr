@@ -34,21 +34,21 @@ type {{.Type}}Interface interface {
 var tplMethod = `
 {{range .Methods}}
 func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
-	joint := aop.Jointcut{
+	joint := aop_core.Jointcut{
 		TargetName: "{{.Name}}",
 		TargetType: "{{.Type}}",
         MethodName: "{{.FuncName}}",
-		Args:       []aop.Args{},
+		Args:       []aop_core.Args{},
 	}
     {{range .Params}}
-    joint.Args = append(joint.Args, aop.Args{ Name : "{{.Name}}", Type: "{{.Type}}", Value: {{.Name}} }){{end}}
+    joint.Args = append(joint.Args, aop_core.Args{ Name : "{{.Name}}", Type: "{{.Type}}", Value: {{.Name}} }){{end}}
 
-    runContext := aop.RunContext{}
-    returnResult := aop.ReturnResult{}
+    runContext := aop_core.RunContext{}
+    returnResult := aop_core.ReturnResult{}
     {{range .ResultAppend}}
     {{.}}{{end}}
 
-    mutableArgs := aop.MuteableArgs{}
+    mutableArgs := aop_core.MuteableArgs{}
     {{range $idx, $e := .Params}}
     mutableArgs.Args = append(mutableArgs.Args, &joint.Args[{{$idx}}]){{end}}
     runContext.MuteableArgs = mutableArgs
@@ -64,9 +64,9 @@ func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
             return nil
     }
 
-    aop.GenerateChain(&joint,&runContext,
+    aop_core.GenerateChain(&joint,&runContext,
         {{range .CallJoints}}
-        func(j aop.Jointcut, m *aop.RunContext) error {
+        func(j aop_core.Jointcut, m *aop_core.RunContext) error {
             return {{.}}
         },
         {{end}}
