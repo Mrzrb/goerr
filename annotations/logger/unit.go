@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"errors"
+
 	"github.com/Mrzrb/goerr/core"
 	"github.com/Mrzrb/goerr/utils"
 )
@@ -24,15 +26,15 @@ type Unit struct {
 }
 
 // Valid implements core.Outputer.
-func (u *Unit) Valid() bool {
+func (u *Unit) Valid() error {
 	if len(u.Params) <= 0 {
-		return false
+		return errors.New("logger param must gt 0")
 	}
 	if u.Params[0].Type != "*gin.Context" {
-		return false
+		return errors.New("param type of 1 must be *gin.Context")
 	}
 	u.Context = u.Params[0]
-	return true
+	return nil
 }
 
 // File implements core.Outputer.
