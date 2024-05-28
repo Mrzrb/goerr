@@ -1,3 +1,5 @@
+github.com/Klathmon/StructToMap v0.0.0-20140724123129-3d0229e2dce7 h1:n0MD6UkwbgGHtXsmfgVzC2+ZbHzIsScpbq9ZGI18074=
+github.com/Klathmon/StructToMap v0.0.0-20140724123129-3d0229e2dce7/go.mod h1:xdrQDwHlKUmv8yiElMx6W0W10cLkqpeSEUUib8KGtv4=
 github.com/YReshetko/go-annotation v0.1.4 h1:m/rYrY7WQwmbIJ0STuePmim99enxCSQxgrlS8M+jPbc=
 github.com/YReshetko/go-annotation v0.1.4/go.mod h1:hiN5bYou7S4hF060YcAFpfZSu2qCKW4ta3u9UnDLCp0=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

@@ -35,6 +35,7 @@ type Logger struct{}
 
 // @Aop(type="around")
 func (c *Logger) Handler(joint aop_core.Jointcut, param *aop_core.RunContext) (err error) {
+	fmt.Println(joint.GetMetaInfo().ProcedureMeta)
 	param.MuteableArgs.Args[0].Value = 55
 	err = joint.Fn()
 	fmt.Printf("\nresult: %+v %+v\n", param.ReturnResult.Args[0], param.ReturnResult.Args[1])

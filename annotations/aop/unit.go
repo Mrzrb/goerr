@@ -1,9 +1,12 @@
 package aop
 
 import (
+	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
+	"github.com/Mrzrb/goerr/annotations/aop_core"
 	"github.com/Mrzrb/goerr/core"
 	"github.com/Mrzrb/goerr/utils"
 )
@@ -34,6 +37,44 @@ func (u *Unit) Imports() []string {
 	return append(u.GetImports(), "github.com/Mrzrb/goerr/annotations/aop_core")
 }
 
+func (u *Unit) AssembleMetaInfo() string {
+	m := aop_core.JointMete{
+		StructMeta:    aop_core.Mete{Mete: map[string]map[string]string{}},
+		ProcedureMeta: map[string]aop_core.Mete{},
+	}
+	for _, a := range u.Struct.Annotations() {
+		t := reflect.TypeOf(a)
+		if _, ok := m.StructMeta.Mete[t.Name()]; !ok {
+			m.StructMeta.Mete[t.Name()] = map[string]string{}
+		}
+		m.StructMeta.Mete[t.Name()] = aop_core.ConvertToMap(a)
+	}
+
+	for _, method := range u.Method {
+		if _, ok := m.ProcedureMeta[method.FuncName]; !ok {
+			m.ProcedureMeta[method.FuncName] = aop_core.Mete{
+				Mete: map[string]map[string]string{},
+			}
+		}
+		for _, v := range method.Annotation {
+			t := reflect.TypeOf(v)
+			if _, ok := m.ProcedureMeta[method.FuncName].Mete[t.Name()]; !ok {
+				m.ProcedureMeta[method.FuncName].Mete[t.Name()] = map[string]string{}
+			}
+			m.ProcedureMeta[method.FuncName].Mete[t.Name()] = aop_core.ConvertToMap(v)
+
+		}
+	}
+
+	data, err := json.Marshal(m)
+	if err != nil {
+		return ""
+	}
+
+	ret := string(data)
+	return strings.ReplaceAll(ret, "\"", "\\\"")
+}
+
 // Output implements core.Outputer.
 func (u *Unit) Output() []byte {
 	ret := []byte{}
@@ -61,6 +102,7 @@ func (u *Unit) Output() []byte {
 		m := map[string]any{
 			"Name":     u.Name,
 			"Type":     u.Type,
+			"Meteinfo": u.AssembleMetaInfo(),
 			"FuncName": v.FuncName,
 			"Param":    v.AssembleParamString(),
 			"ReturnDecl": strings.Join(utils.Map(v.Returns, func(t core.Ident) string {

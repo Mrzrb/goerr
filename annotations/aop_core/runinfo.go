@@ -1,5 +1,7 @@
 package aop_core
 
+import "encoding/json"
+
 type Jointcut struct {
 	TargetName string
 	TargetType string
@@ -7,7 +9,8 @@ type Jointcut struct {
 	// args
 	Args []Args
 	// warp process
-	Fn func() error
+	Fn       func() error
+	MeteInfo string
 }
 
 type RunContext struct {
@@ -39,4 +42,24 @@ type Args struct {
 	Name  string
 	Type  string
 	Value any
+}
+
+func (j *Jointcut) GetMetaInfo() *JointMete {
+	var m JointMete
+
+	err := json.Unmarshal([]byte(j.MeteInfo), &m)
+	if err != nil {
+		return nil
+	}
+
+	return &m
+}
+
+type Mete struct {
+	Mete map[string]map[string]string `json:"mete"`
+}
+
+type JointMete struct {
+	StructMeta    Mete            `json:"structMeta"`
+	ProcedureMeta map[string]Mete `json:"procedureMeta"`
 }

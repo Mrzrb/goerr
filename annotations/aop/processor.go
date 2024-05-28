@@ -126,6 +126,7 @@ func (p *Processor) getUnit() []*Unit {
 				Return:    "",
 				CallParam: "",
 				HasReturn: false,
+				Method:    *m,
 			})
 			u.BaseOutputer.Imports = append(u.BaseOutputer.Imports, m.Imports()...)
 		}

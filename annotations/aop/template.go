@@ -39,6 +39,7 @@ func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
 		TargetType: "{{.Type}}",
         MethodName: "{{.FuncName}}",
 		Args:       []aop_core.Args{},
+        MeteInfo: "{{.Meteinfo}}",
 	}
     {{range .Params}}
     joint.Args = append(joint.Args, aop_core.Args{ Name : "{{.Name}}", Type: "{{.Type}}", Value: {{.Name}} }){{end}}
@@ -56,7 +57,7 @@ func (r *{{.Name}}Proxy) {{.FuncName}}({{.Param}}) {{.Return}} {
 
     
     joint.Fn = func() error {
-            {{.ReturnValSet}} = r.inner.{{.FuncName}}({{range $idx, $e := .Params}}mutableArgs.Args[{{$idx}}].Value.({{.Type}}),{{end}})
+            {{.ReturnValSet}} r.inner.{{.FuncName}}({{range $idx, $e := .Params}}mutableArgs.Args[{{$idx}}].Value.({{.Type}}),{{end}})
             {{range .ErrorCheckers}}
             {{.}}{{end}}
             {{range .ResultSet}}

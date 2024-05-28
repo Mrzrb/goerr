@@ -1,5 +1,7 @@
 package aop_core
 
+import "encoding/json"
+
 func generateChain(raw func() error, effect func(Jointcut, *RunContext) error, joint Jointcut, m *RunContext) func() error {
 	joint.Fn = raw
 	return func() error {
@@ -20,4 +22,19 @@ func Cast[T any](src any) T {
 
 	var vv T
 	return vv
+}
+
+func ConvertToMap[T any](s T) map[string]string {
+	var ret map[string]string
+
+	data, err := json.Marshal(s)
+	if err != nil {
+		return nil
+	}
+
+	err = json.Unmarshal(data, &ret)
+	if err != nil {
+		return nil
+	}
+	return ret
 }

@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/Klathmon/StructToMap v0.0.0-20140724123129-3d0229e2dce7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

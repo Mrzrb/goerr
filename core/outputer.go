@@ -51,6 +51,7 @@ type BaseFuncOutputer struct {
 	Return    string
 	CallParam string
 	HasReturn bool
+	Method
 }
 
 func (b *BaseFuncOutputer) AssembleParamString() string {
@@ -84,10 +85,11 @@ func (b *BaseFuncOutputer) AssembleReturnResultAppendString() []string {
 
 func (b *BaseFuncOutputer) AssembleReturSetDecl() string {
 	idx := 0
-	return strings.Join(utils.Map(b.Returns, func(t Ident) string {
+	s := strings.Join(utils.Map(b.Returns, func(t Ident) string {
 		idx++
 		return fmt.Sprintf(" ret%d", idx)
 	}), ",")
+	return utils.OrGet(s == "", "", s+" =")
 }
 
 func (b *BaseFuncOutputer) AssembleReturnDecl() string {
