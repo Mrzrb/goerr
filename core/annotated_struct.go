@@ -17,7 +17,7 @@ type Struct struct {
 
 // Id implements Identity.
 func (s *Struct) Id() string {
-	return s.Meta().Dir() + s.Name
+	return s.Meta().PackageName() + "." + s.Name
 }
 
 func (s *Struct) Imports() []string {
@@ -41,13 +41,20 @@ var _ Annotated = (*Struct)(nil)
 
 func NewStruct(n annotation.Node) *Struct {
 	node := &Struct{
-		Node:  Node{n},
-		Ident: Ident{},
+		Node: Node{n},
+		Ident: Ident{
+			AnnotationsMix: AnnotationsMix{},
+			Name:           "",
+			Type:           "",
+			Raw:            nil,
+			Package:        "",
+		},
 		Field: []Field{},
 	}
 	// node ident
 	node.Name, node.Type = node.extractStruct(n.ASTNode().(*ast.TypeSpec))
 	node.Annotation = n.Annotations()
+	node.Package = node.Meta().PackageName()
 	node.WalkField(func(f *ast.Field) {
 		nn, t, a := node.extractField(f)
 		fd := Field{
@@ -55,6 +62,7 @@ func NewStruct(n annotation.Node) *Struct {
 			Package:         "",
 			Alias:           "",
 			FullPackagePath: "",
+			Parent:          n,
 		}
 		fd.Alias, fd.FullPackagePath, fd.Package = findFieldPackage(fd.Type, n)
 		node.Field = append(node.Field, fd)

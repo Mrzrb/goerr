@@ -35,7 +35,7 @@ func (f *Func) Call(pkg string, receiver string, returns []string, params ...str
 
 // Id implements Identity.
 func (f *Func) Id() string {
-	return f.Meta().Dir() + f.Name
+	return f.Meta().PackageName() + "." + f.Name
 }
 
 // Nodes implements Annotated.

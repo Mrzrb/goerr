@@ -33,7 +33,7 @@ func (fc *Method) Call(pkg string, receiver string, returns []string, params ...
 
 // Id implements Identity.
 func (fc *Method) Id() string {
-	return fc.Meta().Dir() + fc.Name
+	return fc.Meta().PackageName() + fc.Name
 }
 
 // Nodes implements Annotated.

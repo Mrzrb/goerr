@@ -31,7 +31,9 @@ func ExtractField(s annotation.Node, n *ast.Field) (string, string, []annotation
 	annotatedNode := s.AnnotatedNode(n)
 	var name, ty string
 	if _, ok := n.Type.(*ast.StarExpr); ok {
-		name = n.Names[0].Name
+		if len(n.Names) > 0 {
+			name = n.Names[0].Name
+		}
 		ty = ExtractTypeFromExpr(n.Type)
 	} else {
 		if len(n.Names) > 0 {

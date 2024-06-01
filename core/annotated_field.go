@@ -13,17 +13,20 @@ type Field struct {
 	Package         string
 	Alias           string
 	FullPackagePath string
+	Parent          annotation.Node
 }
 
 // Id implements Identity.
 func (f *Field) Id() string {
-	parentNode, ok := f.Nodes().ParentNode()
-	if !ok {
+	parentNode := f.Parent
+	if parentNode == nil {
 		panic("field must have parent struct")
 	}
 	pNode := Parse(parentNode)
-	if n, ok := Cast[*Struct](pNode); ok {
-		return fmt.Sprintf("%s.%s", n.Id(), f.Name)
+
+	if _, ok := Cast[*Struct](pNode); ok {
+		_, impath, _ := findFieldPackage(f.Name, parentNode)
+		return fmt.Sprintf("%s.%s", impath, f.Name)
 	}
 
 	return ""
@@ -47,7 +50,7 @@ func (f *Field) Nodes() annotation.Node {
 var _ Annotated = (*Field)(nil)
 
 func (f *Field) CheckFieldType() bool {
-	field := f.Nodes().ASTNode().(*ast.Field)
+	field := f.Raw.(*ast.Field)
 	t := reflect.TypeOf(field.Type)
 
 	if t.Kind() == reflect.Ptr {

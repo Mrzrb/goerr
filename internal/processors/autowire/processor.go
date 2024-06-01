@@ -69,7 +69,8 @@ func (p *Process) Prepare() {
 
 	finder := func(src []*Struct, id string) *Struct {
 		find := utils.Filter(src, func(s *Struct) bool {
-			return id == s.Id()
+			sid := s.Id()
+			return id == sid
 		})
 		if len(find) == 0 {
 			return nil
@@ -86,6 +87,9 @@ func (p *Process) Prepare() {
 				return
 			}
 			depend := finder(p.Assembler.Components, field.Id())
+			if depend == nil {
+				return
+			}
 			v.Depend.ChildDependencies = append(v.Depend.ChildDependencies, &DependencyTree{
 				Id:                depend.Id(),
 				ChildDependencies: []*DependencyTree{},
