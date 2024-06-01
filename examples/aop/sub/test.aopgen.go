@@ -35,7 +35,7 @@ func (r *BisClientProxy) Hello() (ret1 int64, ret2 error) {
 		TargetType: "BisClient",
 		MethodName: "Hello",
 		Args:       []aop_core.Args{},
-		MeteInfo:   "{\"structMeta\":{\"mete\":{\"Aop\":{\"Target\":\"Common\",\"Type\":\"point\"}}},\"procedureMeta\":{\"Hello\":{\"mete\":{\"Aop\":{\"Target\":\"\",\"Type\":\"pointcut\"}}}}}",
+		MeteInfo:   "{\"structMeta\":{\"mete\":{\"Aop\":{\"Target\":\"Common\",\"Type\":\"point\",\"Val\":\"\"}}},\"procedureMeta\":{\"Hello\":{\"mete\":{\"Aop\":{\"Target\":\"\",\"Type\":\"pointcut\",\"Val\":\"\"}}}}}",
 	}
 
 	runContext := aop_core.RunContext{}

@@ -35,7 +35,7 @@ func (r *Two2Proxy) Hello(param1 int, s1 *Two1) (ret1 int64, ret2 error) {
 		TargetType: "Two2",
 		MethodName: "Hello",
 		Args:       []aop_core.Args{},
-		MeteInfo:   "{\"structMeta\":{\"mete\":{\"Aop\":{\"Target\":\"Logger\",\"Type\":\"point\"}}},\"procedureMeta\":{\"Hello\":{\"mete\":{\"Aop\":{\"Target\":\"\",\"Type\":\"pointcut\"}}}}}",
+		MeteInfo:   "{\"structMeta\":{\"mete\":{\"Aop\":{\"Target\":\"Logger\",\"Type\":\"point\",\"Val\":\"\"}}},\"procedureMeta\":{\"Hello\":{\"mete\":{\"Aop\":{\"Target\":\"\",\"Type\":\"pointcut\",\"Val\":\"\"}}}}}",
 	}
 
 	joint.Args = append(joint.Args, aop_core.Args{Name: "param1", Type: "int", Value: param1})

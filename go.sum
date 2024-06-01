@@ -1,5 +1,3 @@
-github.com/Klathmon/StructToMap v0.0.0-20140724123129-3d0229e2dce7 h1:n0MD6UkwbgGHtXsmfgVzC2+ZbHzIsScpbq9ZGI18074=
-github.com/Klathmon/StructToMap v0.0.0-20140724123129-3d0229e2dce7/go.mod h1:xdrQDwHlKUmv8yiElMx6W0W10cLkqpeSEUUib8KGtv4=
 github.com/YReshetko/go-annotation v0.1.4 h1:m/rYrY7WQwmbIJ0STuePmim99enxCSQxgrlS8M+jPbc=
 github.com/YReshetko/go-annotation v0.1.4/go.mod h1:hiN5bYou7S4hF060YcAFpfZSu2qCKW4ta3u9UnDLCp0=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
@@ -10,12 +8,13 @@ github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+l
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/samber/do v1.6.0 h1:Jy/N++BXINDB6lAx5wBlbpHlUdl0FKpLWgGEV9YWqaU=
-github.com/samber/do v1.6.0/go.mod h1:DWqBvumy8dyb2vEnYZE7D7zaVEB64J45B0NjTlY/M4k=
-github.com/samber/mo v1.11.0 h1:ZOiSkrGGpNhVv/1dxP02risztdMTIwE8KSW9OG4k5bY=
-github.com/samber/mo v1.11.0/go.mod h1:BfkrCPuYzVG3ZljnZB783WIJIGk1mcZr9c9CPf8tAxs=
+github.com/samber/do/v2 v2.0.0-beta.7 h1:tmdLOVSCbTA6uGWLU5poi/nZvMRh5QxXFJ9vHytU+Jk=
+github.com/samber/do/v2 v2.0.0-beta.7/go.mod h1:+LpV3vu4L81Q1JMZNSkMvSkW9lt4e5eJoXoZHkeBS4c=
+github.com/samber/go-type-to-string v1.7.0 h1:FiSstaAikHMUSLt5bhVlsvCnD7bbQzC8L0UkkGS3Bj8=
+github.com/samber/go-type-to-string v1.7.0/go.mod h1:jpU77vIDoIxkahknKDoEx9C8bQ1ADnh2sotZ8I4QqBU=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
+go.uber.org/goleak v1.2.1 h1:NBol2c7O1ZokfZ0LEU9K6Whx/KnwvepVetCUhtKja4A=
 golang.org/x/mod v0.7.0 h1:LapD9S96VoQRhi/GrNTqeBJFrUjs5UHCAtTlgwA5oZA=
 golang.org/x/mod v0.7.0/go.mod h1:iBbtSCu2XBx23ZKBPSOrRkjjQPZFPuis4dIYUhu/chs=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

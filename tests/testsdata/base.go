@@ -1,12 +1,14 @@
 package testsdata
 
-import "github.com/Mrzrb/goerr/annotations/aop"
+import (
+	"github.com/Mrzrb/goerr/annotations/aop_core"
+)
 
 // @Aop(type="aspect")
 type BaseAspect struct{}
 
 // @Aop(type = "around")
-func (b *BaseAspect) Handle(joint aop.Jointcut) {
+func (b *BaseAspect) Handle(joint aop_core.Jointcut) {
 	joint.Fn()
 }
 
@@ -14,6 +16,6 @@ func (b *BaseAspect) Handle(joint aop.Jointcut) {
 type Basespect1 struct{}
 
 // @Aop(type = "around")
-func (b *Basespect1) Handle1(joint aop.Jointcut) {
+func (b *Basespect1) Handle1(joint aop_core.Jointcut) {
 	joint.Fn()
 }

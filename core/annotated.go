@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"go/ast"
 	"strings"
@@ -8,6 +9,14 @@ import (
 	"github.com/Mrzrb/goerr/utils"
 	annotation "github.com/YReshetko/go-annotation/pkg"
 )
+
+type Identity interface {
+	Id() string
+}
+
+type Callable interface {
+	Call(pkg string, receiver string, returns []string, params ...string) string
+}
 
 type Annotated interface {
 	Generator
@@ -44,9 +53,10 @@ func (n *Node) DstFileName(f ...string) string {
 
 type Ident struct {
 	AnnotationsMix
-	Name string
-	Type string
-	Raw  ast.Node
+	Name    string
+	Type    string
+	Raw     ast.Node
+	Package string
 }
 
 type FuncIdent struct {
@@ -78,6 +88,16 @@ func Parse(node annotation.Node) Annotated {
 	}
 
 	return nil
+}
+
+func Convert[T Annotated](node annotation.Node) (T, error) {
+	var vv T
+	n := Parse(node)
+	if v, ok := Cast[T](n); ok {
+		return v, nil
+	}
+
+	return vv, errors.New("cannot cast")
 }
 
 func ContainsAnnotate[T any](n Annotated) bool {

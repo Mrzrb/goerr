@@ -1,7 +1,9 @@
 package core
 
 import (
+	"fmt"
 	"go/ast"
+	"strings"
 
 	"github.com/Mrzrb/goerr/utils"
 	annotation "github.com/YReshetko/go-annotation/pkg"
@@ -10,6 +12,30 @@ import (
 type Func struct {
 	Node
 	FuncIdent
+}
+
+// Call implements Callable.
+func (f *Func) Call(pkg string, receiver string, returns []string, params ...string) string {
+	if receiver != "" {
+		panic(fmt.Sprintf("call receiver can not be none empty %+v", f))
+	}
+	var b strings.Builder
+	b.WriteString(strings.Join(returns, " ,"))
+	b.WriteString(" = ")
+	if pkg != f.Meta().PackageName() {
+		b.WriteString(f.Meta().PackageName() + ".")
+	}
+	b.WriteString(f.Name)
+	b.WriteString("(")
+	b.WriteString(strings.Join(params, " ,"))
+	b.WriteString(")")
+
+	return b.String()
+}
+
+// Id implements Identity.
+func (f *Func) Id() string {
+	return f.Meta().Dir() + f.Name
 }
 
 // Nodes implements Annotated.

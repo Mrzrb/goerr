@@ -2,6 +2,8 @@ package twoaspect
 
 import (
 	"fmt"
+
+	"github.com/Mrzrb/goerr/examples/aop/common"
 )
 
 type Two1 struct{}
@@ -12,7 +14,9 @@ func (b *Two1) Hello() (int64, error) {
 }
 
 // @Aop(type="point", target="Logger")
-type Two2 struct{}
+type Two2 struct {
+	This common.Common
+}
 
 // @Aop(type="pointcut")
 func (b *Two2) Hello(param1 int, s1 *Two1) (int64, error) {

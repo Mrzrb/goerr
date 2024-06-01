@@ -1,7 +1,9 @@
 package core
 
 import (
+	"fmt"
 	"go/ast"
+	"strings"
 
 	"github.com/Mrzrb/goerr/utils"
 	annotation "github.com/YReshetko/go-annotation/pkg"
@@ -11,6 +13,11 @@ type Struct struct {
 	Node
 	Ident
 	Field []Field
+}
+
+// Id implements Identity.
+func (s *Struct) Id() string {
+	return s.Meta().Dir() + s.Name
 }
 
 func (s *Struct) Imports() []string {
@@ -24,10 +31,6 @@ func (s *Struct) Imports() []string {
 // Nodes implements Annotated.
 func (s *Struct) Nodes() annotation.Node {
 	return s.Node
-}
-
-type Field struct {
-	Ident
 }
 
 func (s *Struct) Annotate() []annotation.Annotation {
@@ -46,19 +49,65 @@ func NewStruct(n annotation.Node) *Struct {
 	node.Name, node.Type = node.extractStruct(n.ASTNode().(*ast.TypeSpec))
 	node.Annotation = n.Annotations()
 	node.WalkField(func(f *ast.Field) {
-		n, t, a := node.extractField(f)
+		nn, t, a := node.extractField(f)
 		fd := Field{
-			Ident: Ident{
-				AnnotationsMix: AnnotationsMix{Annotation: a},
-				Name:           n,
-				Type:           t,
-				Raw:            f,
-			},
+			Ident:           Ident{AnnotationsMix: AnnotationsMix{Annotation: a}, Name: nn, Type: t, Raw: f},
+			Package:         "",
+			Alias:           "",
+			FullPackagePath: "",
 		}
+		fd.Alias, fd.FullPackagePath, fd.Package = findFieldPackage(fd.Type, n)
 		node.Field = append(node.Field, fd)
 	})
 
 	return node
+}
+
+func getPkgFromFullPath(path string) string {
+	if path == "" {
+		return ""
+	}
+	pathSlice := strings.Split(path, "/")
+	if len(pathSlice) == 1 {
+		return strings.Trim(pathSlice[0], "\"")
+	}
+	return strings.Trim(pathSlice[len(pathSlice)-1], "\"")
+}
+
+func findFieldPackage(tp string, n annotation.Node) (name string, importPath string, pkg string) {
+	tp = strings.ReplaceAll(tp, "*", "")
+	tpSlice := strings.Split(tp, ".")
+	if len(tpSlice) <= 1 {
+		return "", n.Meta().PackageName(), getPkgFromFullPath(n.Meta().PackageName())
+	}
+
+	im := n.Imports()
+	fmt.Println(im)
+	utils.Walk(n.Imports(), func(is *ast.ImportSpec) {
+		if is == nil {
+			return
+		}
+
+		if is.Name != nil {
+			if tpSlice[0] == is.Name.Name {
+				name = tpSlice[0]
+				importPath = is.Path.Value
+				return
+			}
+		} else {
+			path := strings.ReplaceAll(is.Path.Value, "\"", "")
+			pathSlice := strings.Split(path, "/")
+			if len(pathSlice) < 1 {
+				return
+			}
+			if pathSlice[len(pathSlice)-1] == tpSlice[0] {
+				name = tpSlice[0]
+				importPath = is.Path.Value
+				return
+			}
+		}
+	})
+	return name, strings.ReplaceAll(importPath, "\"", ""), getPkgFromFullPath(importPath)
 }
 
 func (s *Struct) extractStruct(n *ast.TypeSpec) (string, string) {
@@ -75,6 +124,12 @@ func (s *Struct) extractField(n *ast.Field) (string, string, []annotation.Annota
 
 func (s *Struct) WalkField(fn func(*ast.Field)) {
 	for _, v := range s.ASTNode().(*ast.TypeSpec).Type.(*ast.StructType).Fields.List {
+		fn(v)
+	}
+}
+
+func (s *Struct) WalkFieldAnnoted(fn func(Field)) {
+	for _, v := range s.Field {
 		fn(v)
 	}
 }
