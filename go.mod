@@ -2,9 +2,7 @@ module github.com/Mrzrb/goerr
 
 go 1.18
 
-replace (
-	github.com/YReshetko/go-annotation => /Users/zhangruobin/Episodes/travel/coding/golang/go-annotation
-)
+replace github.com/YReshetko/go-annotation => /Users/zhangruobin/Episodes/travel/coding/golang/go-annotation
 
 require (
 	github.com/YReshetko/go-annotation v0.1.4

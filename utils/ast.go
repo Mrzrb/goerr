@@ -27,6 +27,27 @@ func ExtractTypeFromExpr(v ast.Expr) string {
 	}
 }
 
+func ExtractFieldWithPointer(s annotation.Node, n *ast.Field) (string, string, []annotation.Annotation, bool) {
+	isPointer := false
+	annotatedNode := s.AnnotatedNode(n)
+	var name, ty string
+	if _, ok := n.Type.(*ast.StarExpr); ok {
+		isPointer = true
+		if len(n.Names) > 0 {
+			name = n.Names[0].Name
+		}
+		ty = ExtractTypeFromExpr(n.Type)
+	} else {
+		if len(n.Names) > 0 {
+			name = n.Names[0].Name
+		}
+
+		ty = ExtractTypeFromExpr(n.Type)
+	}
+	anns := annotatedNode.Annotations()
+	return name, ty, anns, isPointer
+}
+
 func ExtractField(s annotation.Node, n *ast.Field) (string, string, []annotation.Annotation) {
 	annotatedNode := s.AnnotatedNode(n)
 	var name, ty string

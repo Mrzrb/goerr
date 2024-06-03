@@ -26,7 +26,7 @@ func (f *Field) Id() string {
 
 	if _, ok := Cast[*Struct](pNode); ok {
 		_, impath, _ := findFieldPackage(f.Name, parentNode)
-		return fmt.Sprintf("%s.%s", impath, f.Name)
+		return fmt.Sprintf("%s.%s", impath, f.Type)
 	}
 
 	return ""
@@ -44,7 +44,7 @@ func (f *Field) DstFileName(...string) string {
 
 // Nodes implements Annotated.
 func (f *Field) Nodes() annotation.Node {
-	return f.Nodes()
+	return nil
 }
 
 var _ Annotated = (*Field)(nil)

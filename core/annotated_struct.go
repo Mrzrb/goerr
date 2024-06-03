@@ -56,9 +56,16 @@ func NewStruct(n annotation.Node) *Struct {
 	node.Annotation = n.Annotations()
 	node.Package = node.Meta().PackageName()
 	node.WalkField(func(f *ast.Field) {
-		nn, t, a := node.extractField(f)
+		nn, t, a, isPointer := node.extractField(f)
 		fd := Field{
-			Ident:           Ident{AnnotationsMix: AnnotationsMix{Annotation: a}, Name: nn, Type: t, Raw: f},
+			Ident: Ident{
+				AnnotationsMix: AnnotationsMix{Annotation: a},
+				Name:           nn,
+				Type:           t,
+				Raw:            f,
+				IsPointer:      isPointer,
+				Package:        "",
+			},
 			Package:         "",
 			Alias:           "",
 			FullPackagePath: "",
@@ -122,8 +129,8 @@ func (s *Struct) extractStruct(n *ast.TypeSpec) (string, string) {
 	return n.Name.Name, n.Name.Name
 }
 
-func (s *Struct) extractField(n *ast.Field) (string, string, []annotation.Annotation) {
-	return utils.ExtractField(s.Node, n)
+func (s *Struct) extractField(n *ast.Field) (string, string, []annotation.Annotation, bool) {
+	return utils.ExtractFieldWithPointer(s.Node, n)
 	// annotatedNode := s.AnnotatedNode(n)
 	// name, ty := n.Names[0].Name, utils.ExtractTypeFromExpr(n.Type)
 	// anns := annotatedNode.Annotations()

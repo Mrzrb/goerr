@@ -20,10 +20,12 @@ func (f *Func) Call(pkg string, receiver string, returns []string, params ...str
 		panic(fmt.Sprintf("call receiver can not be none empty %+v", f))
 	}
 	var b strings.Builder
-	b.WriteString(strings.Join(returns, " ,"))
-	b.WriteString(" = ")
-	if pkg != f.Meta().PackageName() {
-		b.WriteString(f.Meta().PackageName() + ".")
+	if len(returns) > 0 {
+		b.WriteString(strings.Join(returns, " ,"))
+		b.WriteString(" := ")
+		if pkg != f.Meta().PackageName() {
+			b.WriteString(f.Meta().PackageName() + ".")
+		}
 	}
 	b.WriteString(f.Name)
 	b.WriteString("(")
@@ -72,7 +74,7 @@ func NewFunc(n annotation.Node) *Func {
 			Type: "",
 		}
 		p.Raw = f
-		p.Name, p.Type, p.Annotation = fc.extractField(f)
+		p.Name, p.Type, p.Annotation, p.IsPointer = fc.extractField(f)
 		fc.Param = append(fc.Param, p)
 	})
 
@@ -84,7 +86,7 @@ func NewFunc(n annotation.Node) *Func {
 			Name: "",
 			Type: "",
 		}
-		p.Name, p.Type, p.Annotation = fc.extractField(f)
+		p.Name, p.Type, p.Annotation, p.IsPointer = fc.extractField(f)
 		p.Raw = f
 		fc.Retern = append(fc.Retern, p)
 	})
@@ -97,8 +99,8 @@ func (fc *Func) extractFunc(n annotation.Node) string {
 	return ft.Name.Name
 }
 
-func (s *Func) extractField(n *ast.Field) (string, string, []annotation.Annotation) {
-	return utils.ExtractField(s.Node, n)
+func (s *Func) extractField(n *ast.Field) (string, string, []annotation.Annotation, bool) {
+	return utils.ExtractFieldWithPointer(s.Node, n)
 }
 
 func (s *Func) WalkField(fn func(*ast.Field)) {

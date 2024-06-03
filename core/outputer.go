@@ -35,7 +35,7 @@ type BaseOutputer struct {
 func (b *BaseOutputer) PushImport(pkgName string, dirName string) {
 	pkg := pkgName
 	if pkgName != b.Package {
-		pkg = utils.GetFullPackage(dirName)
+		pkg = utils.GetFullPackage(dirName).ImportPath
 	}
 
 	b.Imports = append(b.Imports, pkg)

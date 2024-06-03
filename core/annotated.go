@@ -53,10 +53,16 @@ func (n *Node) DstFileName(f ...string) string {
 
 type Ident struct {
 	AnnotationsMix
-	Name    string
-	Type    string
-	Raw     ast.Node
-	Package string
+	Name      string
+	Type      string
+	Raw       ast.Node
+	IsPointer bool
+	Package   string
+}
+
+func (i *Ident) Id(node annotation.Node) string {
+	_, importPath, _ := findFieldPackage(i.Type, node)
+	return fmt.Sprintf("%s.%s", importPath, strings.ReplaceAll(i.Type, "*", ""))
 }
 
 type FuncIdent struct {

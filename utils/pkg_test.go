@@ -6,6 +6,6 @@ import (
 )
 
 func TestPkg(t *testing.T) {
-	pkg := GetFullPackage("../examples/aop/sub")
+	pkg := GetFullPackage(".")
 	fmt.Println(pkg)
 }

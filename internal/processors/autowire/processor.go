@@ -1,20 +1,37 @@
 package autowire
 
 import (
+	"go/ast"
+	"strings"
+
 	"github.com/Mrzrb/goerr/annotations/autowire"
 	"github.com/Mrzrb/goerr/core"
 	"github.com/Mrzrb/goerr/utils"
 	annotation "github.com/YReshetko/go-annotation/pkg"
 )
 
+var e = core.NewExporter(&core.Assembler)
+
 var process = Process{
 	Collector: core.Collector{},
+	Pre:       PreCollector{},
+	Assembler: Assembler{
+		Scope:        "",
+		Pre:          PreCollector{},
+		Components:   []*Struct{},
+		Factory:      []*core.Func{},
+		BaseOutputer: core.BaseOutputer{},
+		b:            strings.Builder{},
+		inited:       map[string]initItem{},
+	},
+	FileExporter: &e,
 }
 
 type Process struct {
 	Collector core.Collector
 	Pre       PreCollector
 	Assembler Assembler
+	core.FileExporter
 }
 
 // Name implements annotation.AnnotationProcessor.
@@ -25,7 +42,8 @@ func (p *Process) Name() string {
 // Output implements annotation.AnnotationProcessor.
 func (p *Process) Output() map[string][]byte {
 	p.Prepare()
-	return nil
+	p.Append(&p.Assembler)
+	return p.Export()
 }
 
 // Process implements annotation.AnnotationProcessor.
@@ -33,7 +51,7 @@ func (p *Process) Process(node annotation.Node) error {
 	p.Collector.Process(node)
 	if len(annotation.FindAnnotations[autowire.AutowireMete](node.Annotations())) > 0 {
 		anno := annotation.FindAnnotations[autowire.AutowireMete](node.Annotations())[0]
-		p.Assembler.File = anno.File
+		p.Assembler.BaseOutputer.File = anno.File
 		p.Assembler.Scope = anno.Scope
 	}
 	return nil
@@ -48,7 +66,7 @@ func (p *Process) Version() string {
 func (p *Process) Prepare() {
 	components := []*Struct{}
 	factories := []*core.Func{}
-	fields := []*core.Field{}
+	fields := map[string]*core.Field{}
 	p.Collector.Walk(func(node core.Annotated) {
 		if s, ok := core.Cast[*core.Struct](node); ok {
 			p.Pre.Components = append(p.Pre.Components, s.Id())
@@ -56,14 +74,42 @@ func (p *Process) Prepare() {
 				Struct: *s,
 				Depend: DependencyTree{},
 			})
+			for _, f := range s.Field {
+				if field, ok := f.Raw.(*ast.Field); ok {
+					if field.Doc == nil {
+						continue
+					}
+					for _, comment := range field.Doc.List {
+						if strings.Contains(comment.Text, "Autowire") {
+							ff := &core.Field{
+								Ident: core.Ident{
+									AnnotationsMix: core.AnnotationsMix{},
+									Name:           f.Name,
+									Type:           f.Type,
+									Raw:            field,
+									IsPointer:      f.IsPointer,
+									Package:        "",
+								},
+								Package:         node.Nodes().Meta().PackageName(),
+								Alias:           "",
+								FullPackagePath: "",
+								Parent:          s.Node,
+							}
+							fields[strings.ReplaceAll(f.Id(), "*", "")] = ff
+						}
+					}
+				}
+			}
+			return
 		}
 		if s, ok := core.Cast[*core.Func](node); ok {
 			p.Pre.Factories = append(p.Pre.Components, s.Id())
 			factories = append(factories, s)
+			return
 		}
 		if s, ok := core.Cast[*core.Field](node); ok {
-			p.Pre.Factories = append(p.Pre.Components, s.Id())
-			fields = append(fields, s)
+			fields[s.Id()] = s
+			return
 		}
 	})
 
@@ -81,30 +127,25 @@ func (p *Process) Prepare() {
 	// buildDenpendency
 	p.Assembler.Components = components
 	p.Assembler.Factory = factories
+	p.Assembler.Fields = fields
 	for _, v := range p.Assembler.Components {
 		v.WalkFieldAnnoted(func(field core.Field) {
 			if !field.CheckFieldType() {
 				return
 			}
-			depend := finder(p.Assembler.Components, field.Id())
+			depend := finder(p.Assembler.Components, strings.ReplaceAll(field.Id(), "*", ""))
 			if depend == nil {
 				return
 			}
 			v.Depend.ChildDependencies = append(v.Depend.ChildDependencies, &DependencyTree{
 				Id:                depend.Id(),
+				Name:              field.Name,
 				ChildDependencies: []*DependencyTree{},
 			})
 		})
 	}
-}
 
-func (p *Process) GetComponentById(id string) *Struct {
-	for _, c := range p.Assembler.Components {
-		if c.Id() == id {
-			return c
-		}
-	}
-	return nil
+	p.Assembler.BaseOutputer.Package = "main"
 }
 
 var _ annotation.AnnotationProcessor = (*Process)(nil)
