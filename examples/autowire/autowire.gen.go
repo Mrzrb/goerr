@@ -13,7 +13,6 @@ import (
 )
 
 func init() {
-
 	app := App{}
 
 	do.ProvideNamedValue(di.GlobalInjector, "main.App", app)
@@ -32,5 +31,4 @@ func init() {
 	do.Provide(di.GlobalInjector, func(i do.Injector) (*sub.Sub, error) {
 		return sub_newsub, nil
 	})
-
 }

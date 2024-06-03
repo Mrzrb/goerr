@@ -3,6 +3,7 @@ package autowire
 import (
 	"errors"
 	"fmt"
+	"go/ast"
 	"strings"
 
 	"github.com/Mrzrb/goerr/core"
@@ -44,13 +45,34 @@ func (a *Assembler) File() string {
 	return "autowire.gen.go"
 }
 
+func fieldAutowire(field *ast.Field) bool {
+	if field.Doc == nil {
+		return false
+	}
+	for _, comment := range field.Doc.List {
+		if strings.Contains(comment.Text, "Autowire") {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Imports implements core.Outputer.
 func (p *Assembler) Imports() []string {
 	for _, v := range p.Components {
-		p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Imports()...)
+		v.WalkField(func(f *ast.Field) {
+			if fieldAutowire(f) {
+				p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Node.Import(f.Type)...)
+			}
+		})
 	}
 	for _, v := range p.Factory {
-		p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Imports()...)
+		v.WalkField(func(f *ast.Field) {
+			if fieldAutowire(f) {
+				p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Node.Import(f.Type)...)
+			}
+		})
 	}
 	return append(p.BaseOutputer.Imports, "github.com/samber/do/v2", "github.com/Mrzrb/goerr/di")
 }
