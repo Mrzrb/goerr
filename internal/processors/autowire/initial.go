@@ -6,8 +6,8 @@ import (
 )
 
 func init() {
+	annotation.Register[anno.AutowireMete](&process)
 	annotation.Register[anno.Factory](&process)
 	annotation.Register[anno.Autowired](&process)
 	annotation.Register[anno.Component](&process)
-	annotation.Register[anno.AutowireMete](&process)
 }

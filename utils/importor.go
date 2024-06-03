@@ -2,6 +2,7 @@ package utils
 
 import (
 	"go/ast"
+	"path/filepath"
 	"strings"
 
 	"github.com/Mrzrb/goerr/utils/stream"
@@ -114,4 +115,12 @@ func GetImports(e ast.Expr, lookup ImportLookup) DistinctImports {
 		return true
 	})
 	return out
+}
+
+func GetPkgWithFullPath(m annotation.Meta) string {
+	rootDir := m.Root()
+	dir := m.Dir()
+	relative, _ := filepath.Rel(rootDir, dir)
+	pkgInfo := GetFullPackage(dir)
+	return pkgInfo.Module.Path + "/" + relative
 }

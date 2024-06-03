@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"go/ast"
 	"strings"
 
@@ -96,8 +95,6 @@ func findFieldPackage(tp string, n annotation.Node) (name string, importPath str
 		return "", n.Meta().PackageName(), getPkgFromFullPath(n.Meta().PackageName())
 	}
 
-	im := n.Imports()
-	fmt.Println(im)
 	utils.Walk(n.Imports(), func(is *ast.ImportSpec) {
 		if is == nil {
 			return

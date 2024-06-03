@@ -23,6 +23,7 @@ var tplRegisterVariable = `
     do.Provide(di.GlobalInjector, func(i do.Injector) ({{.InjectType}}, error) {
         return {{.InjectVal}}, nil
     })
+    fmt.Printf("inject success %s, name is %s \n", "{{.InjectType}}", "{{.InjectName}}")
 `
 var tplRegisterVariableName = "register"
 

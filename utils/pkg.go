@@ -10,6 +10,7 @@ type PackageInfo struct {
 	ImportPath string `json:"ImportPath"`
 	Module     struct {
 		Path string `json:"path"`
+		Dir  string `json:"dir"`
 	} `json:"module"`
 }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"os"
 	"strings"
 
 	"github.com/Mrzrb/goerr/core"
@@ -42,7 +43,13 @@ func NewInitItem(isPoint bool, name string) initItem {
 
 // File implements core.Outputer.
 func (a *Assembler) File() string {
-	return "autowire.gen.go"
+	f := utils.GetFullPackage(".").Module.Dir + "/" + a.BaseOutputer.File
+	fmt.Println(a.BaseOutputer.File)
+	fslice := strings.Split(f, "/")
+	f = strings.Join(fslice[:len(fslice)-1], "/")
+	// 创建文件路径中可能不存在的目录
+	os.MkdirAll(f, 0755)
+	return a.BaseOutputer.File
 }
 
 func fieldAutowire(field *ast.Field) bool {
@@ -61,6 +68,9 @@ func fieldAutowire(field *ast.Field) bool {
 // Imports implements core.Outputer.
 func (p *Assembler) Imports() []string {
 	for _, v := range p.Components {
+		if v.Meta().PackageName() != p.Package() {
+			p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, utils.GetPkgWithFullPath(v.Meta()))
+		}
 		v.WalkField(func(f *ast.Field) {
 			if fieldAutowire(f) {
 				p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Node.Import(f.Type)...)
@@ -68,13 +78,16 @@ func (p *Assembler) Imports() []string {
 		})
 	}
 	for _, v := range p.Factory {
+		if v.Meta().PackageName() != p.Package() {
+			p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, utils.GetPkgWithFullPath(v.Meta()))
+		}
 		v.WalkField(func(f *ast.Field) {
 			if fieldAutowire(f) {
 				p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Node.Import(f.Type)...)
 			}
 		})
 	}
-	return append(p.BaseOutputer.Imports, "github.com/samber/do/v2", "github.com/Mrzrb/goerr/di")
+	return append(p.BaseOutputer.Imports, "github.com/samber/do/v2", "github.com/Mrzrb/goerr/di", "fmt")
 }
 
 // Output implements core.Outputer.
@@ -176,10 +189,7 @@ func (p *Assembler) parseComponent(v *Struct) error {
 			if !ok {
 				panic("cannot find param")
 			}
-			val := ""
-			if f.IsPointer && initial.IsPoint {
-				val = initial.Name
-			}
+			val := initial.Name
 			if f.IsPointer && !initial.IsPoint {
 				val = "&" + initial.Name
 			}
@@ -197,11 +207,7 @@ func (p *Assembler) parseComponent(v *Struct) error {
 
 func (p *Assembler) Inject() []byte {
 	for _, v := range p.Components {
-		p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Imports()...)
 		p.parseComponent(v)
-	}
-	for _, v := range p.Factory {
-		p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Imports()...)
 	}
 	return []byte(p.b.String())
 }

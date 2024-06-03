@@ -52,6 +52,7 @@ func (p *Process) Process(node annotation.Node) error {
 	if len(annotation.FindAnnotations[autowire.AutowireMete](node.Annotations())) > 0 {
 		anno := annotation.FindAnnotations[autowire.AutowireMete](node.Annotations())[0]
 		p.Assembler.BaseOutputer.File = anno.File
+		p.Assembler.BaseOutputer.Package = anno.Package
 		p.Assembler.Scope = anno.Scope
 	}
 	return nil
@@ -95,7 +96,7 @@ func (p *Process) Prepare() {
 								FullPackagePath: "",
 								Parent:          s.Node,
 							}
-							fields[strings.ReplaceAll(f.Id(), "*", "")] = ff
+							fields[strings.ReplaceAll(f.Type, "*", "")] = ff
 						}
 					}
 				}
@@ -133,7 +134,7 @@ func (p *Process) Prepare() {
 			if !field.CheckFieldType() {
 				return
 			}
-			depend := finder(p.Assembler.Components, strings.ReplaceAll(field.Id(), "*", ""))
+			depend := finder(p.Assembler.Components, strings.ReplaceAll(field.Type, "*", ""))
 			if depend == nil {
 				return
 			}
@@ -144,8 +145,6 @@ func (p *Process) Prepare() {
 			})
 		})
 	}
-
-	p.Assembler.BaseOutputer.Package = "main"
 }
 
 var _ annotation.AnnotationProcessor = (*Process)(nil)
