@@ -1,17 +1,11 @@
 package main
 
+import "github.com/Mrzrb/goerr/examples/autowire/sub"
+
 // @Component()
 type App struct {
 	// @Autowired()
-	Name Name
-	// @Autowired()
-	Name1 *Name1
-}
-
-// @Component()
-type Name1 struct {
-	FirstName  string
-	SecondName string
+	Name1 *sub.Sub
 }
 
 // @Component()

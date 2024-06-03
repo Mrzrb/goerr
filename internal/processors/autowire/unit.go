@@ -45,8 +45,14 @@ func (a *Assembler) File() string {
 }
 
 // Imports implements core.Outputer.
-func (a *Assembler) Imports() []string {
-	return append(a.BaseOutputer.Imports, "github.com/samber/do/v2", "github.com/Mrzrb/goerr/di")
+func (p *Assembler) Imports() []string {
+	for _, v := range p.Components {
+		p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Imports()...)
+	}
+	for _, v := range p.Factory {
+		p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Imports()...)
+	}
+	return append(p.BaseOutputer.Imports, "github.com/samber/do/v2", "github.com/Mrzrb/goerr/di")
 }
 
 // Output implements core.Outputer.
@@ -99,8 +105,6 @@ func (p *Process) GetUnit() *Assembler {
 }
 
 func (p *Assembler) parseComponent(v *Struct) error {
-	name := v.Name
-	fmt.Println(name)
 	if _, ok := p.inited[v.Id()]; ok {
 		return nil
 	}
@@ -130,7 +134,9 @@ func (p *Assembler) parseComponent(v *Struct) error {
 		variableRet = strings.ReplaceAll(variableRet, "/", "_")
 		variableRet = strings.ToLower(variableRet)
 		decl, variableName := GetTplFactory(c, p.BaseOutputer.Package, "", []string{variableRet})
-		p.b.Write(GetRegisterVariable(decl, v.Id(), utils.OrGet(declIsPointer, "*"+v.Type, v.Type), variableName))
+		vType := utils.OrGet(v.Meta().PackageName() == "main", v.Type, v.Meta().PackageName()+"."+v.Type)
+		tp := utils.OrGet(declIsPointer, "*"+vType, vType)
+		p.b.Write(GetRegisterVariable(decl, v.Id(), tp, variableName))
 		p.inited[v.Id()] = NewInitItem(declIsPointer, variableName)
 	} else {
 		variableName := strings.ReplaceAll(v.Id(), ".", "_")
@@ -160,8 +166,8 @@ func (p *Assembler) parseComponent(v *Struct) error {
 			}
 			return fmt.Sprintf("%s: %s,", t.Name, val)
 		})
-		decl := GetInitVariable(variableName, v.Type, params)
-		p.b.Write(GetRegisterVariable(string(decl), v.Id(), v.Type, variableName))
+		decl := GetInitVariable(variableName, utils.OrGet(v.Meta().PackageName() == "main", v.Type, v.Meta().PackageName()+"."+v.Type), params)
+		p.b.Write(GetRegisterVariable(string(decl), v.Id(), utils.OrGet(v.Meta().PackageName() == "main", v.Type, v.Meta().PackageName()+"."+v.Type), variableName))
 		p.inited[v.Id()] = NewInitItem(false, variableName)
 	}
 	return nil
@@ -169,7 +175,11 @@ func (p *Assembler) parseComponent(v *Struct) error {
 
 func (p *Assembler) Inject() []byte {
 	for _, v := range p.Components {
+		p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Imports()...)
 		p.parseComponent(v)
+	}
+	for _, v := range p.Factory {
+		p.BaseOutputer.Imports = append(p.BaseOutputer.Imports, v.Imports()...)
 	}
 	return []byte(p.b.String())
 }

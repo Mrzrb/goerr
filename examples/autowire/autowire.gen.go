@@ -8,10 +8,18 @@ package main
 
 import (
 	"github.com/Mrzrb/goerr/di"
+	"github.com/Mrzrb/goerr/examples/autowire/sub"
 	"github.com/samber/do/v2"
 )
 
 func init() {
+
+	app := App{}
+
+	do.ProvideNamedValue(di.GlobalInjector, "main.App", app)
+	do.Provide(di.GlobalInjector, func(i do.Injector) (App, error) {
+		return app, nil
+	})
 
 	main_newname := NewName()
 	do.ProvideNamedValue(di.GlobalInjector, "main.Name", main_newname)
@@ -19,21 +27,10 @@ func init() {
 		return main_newname, nil
 	})
 
-	name1 := Name1{}
-
-	do.ProvideNamedValue(di.GlobalInjector, "main.Name1", name1)
-	do.Provide(di.GlobalInjector, func(i do.Injector) (Name1, error) {
-		return name1, nil
-	})
-
-	app := App{
-		Name:  *main_newname,
-		Name1: &name1,
-	}
-
-	do.ProvideNamedValue(di.GlobalInjector, "main.App", app)
-	do.Provide(di.GlobalInjector, func(i do.Injector) (App, error) {
-		return app, nil
+	sub_newsub := sub.NewSub()
+	do.ProvideNamedValue(di.GlobalInjector, "sub.Sub", sub_newsub)
+	do.Provide(di.GlobalInjector, func(i do.Injector) (*sub.Sub, error) {
+		return sub_newsub, nil
 	})
 
 }

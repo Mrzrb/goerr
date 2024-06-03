@@ -15,7 +15,7 @@ var e = core.NewExporter(&core.Assembler)
 var process = Process{
 	Collector: core.Collector{},
 	Pre:       PreCollector{},
-	Assembler: Assembler{
+	Assembler: &Assembler{
 		Scope:        "",
 		Pre:          PreCollector{},
 		Components:   []*Struct{},
@@ -30,7 +30,7 @@ var process = Process{
 type Process struct {
 	Collector core.Collector
 	Pre       PreCollector
-	Assembler Assembler
+	Assembler *Assembler
 	core.FileExporter
 }
 
@@ -42,7 +42,7 @@ func (p *Process) Name() string {
 // Output implements annotation.AnnotationProcessor.
 func (p *Process) Output() map[string][]byte {
 	p.Prepare()
-	p.Append(&p.Assembler)
+	p.Append(p.Assembler)
 	return p.Export()
 }
 
