@@ -145,6 +145,20 @@ func (p *Process) Prepare() {
 					ChildDependencies: []*DependencyTree{},
 				})
 			} else {
+				isAutowire := false
+				if f, ok := field.Raw.(*ast.Field); ok {
+					if f.Doc == nil {
+						return
+					}
+					for _, comment := range f.Doc.List {
+						if !strings.Contains(comment.Text, "Autowire") {
+							isAutowire = true
+						}
+					}
+				}
+				if !isAutowire {
+					return
+				}
 				v.Depend.ChildDependencies = append(v.Depend.ChildDependencies, &DependencyTree{
 					Id:                field.FullPackageType(),
 					Name:              field.Name,
