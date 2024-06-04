@@ -29,6 +29,14 @@ type Assembler struct {
 	inited map[string]initItem
 }
 
+func (a *Assembler) CheckFieldIsPointer(id string) bool {
+	f, ok := a.Fields[id]
+	if !ok {
+		panic("cannot find param")
+	}
+	return f.IsPointer
+}
+
 type initItem struct {
 	IsPoint bool
 	Name    string
@@ -139,6 +147,36 @@ func (p *Process) GetUnit() *Assembler {
 	return ret
 }
 
+func (p *Assembler) hasInited(variableName string) bool {
+	for _, v := range p.inited {
+		if v.Name == variableName {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p *Assembler) parseComponentByFactory(v *core.Func) error {
+	declIsPointer := false
+	if len(v.Retern) > 1 {
+		panic("factory must be one")
+	}
+	declIsPointer = v.Retern[0].IsPointer
+	variableRet := strings.ReplaceAll(v.Id(), ".", "_")
+	variableRet = strings.ReplaceAll(variableRet, "/", "_")
+	variableRet = strings.ToLower(variableRet)
+	decl, variableName := GetTplFactory(v, p.BaseOutputer.Package, "", []string{variableRet})
+	if p.hasInited(variableName) {
+		return nil
+	}
+	vType := v.Retern[0].FullPackageType()
+	tp := utils.OrGet(declIsPointer, "*"+vType, vType)
+	p.b.Write(GetRegisterVariable(decl, v.Id(), tp, variableName))
+	p.inited[v.Retern[0].FullPackageType()] = NewInitItem(declIsPointer, variableName)
+	return nil
+}
+
 func (p *Assembler) parseComponent(v *Struct) error {
 	if _, ok := p.inited[v.Id()]; ok {
 		return nil
@@ -148,9 +186,18 @@ func (p *Assembler) parseComponent(v *Struct) error {
 		if !f.Resolved {
 			canInitial = false
 			fieldStruct := p.GetComponentById(f.Id)
-			err := p.parseComponent(fieldStruct)
-			if err == nil {
-				canInitial = true
+			if fieldStruct != nil {
+				err := p.parseComponent(fieldStruct)
+				if err == nil {
+					canInitial = true
+				}
+			}
+			factory := p.GetFactoryById(f.Id)
+			if factory != nil {
+				err := p.parseComponentByFactory(factory)
+				if err == nil {
+					canInitial = true
+				}
 			}
 		}
 	}
@@ -185,15 +232,12 @@ func (p *Assembler) parseComponent(v *Struct) error {
 			if !ok {
 				panic(fmt.Sprintf("initial fail, component not init, %s", t.Id))
 			}
-			f, ok := p.Fields[t.Id]
-			if !ok {
-				panic("cannot find param")
-			}
+			isPointer := p.CheckFieldIsPointer(t.Id)
 			val := initial.Name
-			if f.IsPointer && !initial.IsPoint {
+			if isPointer && !initial.IsPoint {
 				val = "&" + initial.Name
 			}
-			if !f.IsPointer && initial.IsPoint {
+			if !isPointer && initial.IsPoint {
 				val = "*" + initial.Name
 			}
 			return fmt.Sprintf("%s: %s,", t.Name, val)
@@ -216,6 +260,9 @@ func (p *Assembler) GetFactoryById(id string) *core.Func {
 	for _, c := range p.Factory {
 		for _, r := range c.FuncIdent.Retern {
 			if r.Id(c.Node) == id {
+				return c
+			}
+			if strings.ReplaceAll(r.Type, "*", "") == id {
 				return c
 			}
 		}

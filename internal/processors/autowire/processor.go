@@ -96,7 +96,7 @@ func (p *Process) Prepare() {
 								FullPackagePath: "",
 								Parent:          s.Node,
 							}
-							fields[strings.ReplaceAll(f.Type, "*", "")] = ff
+							fields[strings.ReplaceAll(f.FullPackageType(), "*", "")] = ff
 						}
 					}
 				}
@@ -136,13 +136,21 @@ func (p *Process) Prepare() {
 			}
 			depend := finder(p.Assembler.Components, strings.ReplaceAll(field.Type, "*", ""))
 			if depend == nil {
-				return
+				depend = finder(p.Assembler.Components, strings.ReplaceAll(field.Package+"."+field.Type, "*", ""))
 			}
-			v.Depend.ChildDependencies = append(v.Depend.ChildDependencies, &DependencyTree{
-				Id:                depend.Id(),
-				Name:              field.Name,
-				ChildDependencies: []*DependencyTree{},
-			})
+			if depend != nil {
+				v.Depend.ChildDependencies = append(v.Depend.ChildDependencies, &DependencyTree{
+					Id:                depend.Id(),
+					Name:              field.Name,
+					ChildDependencies: []*DependencyTree{},
+				})
+			} else {
+				v.Depend.ChildDependencies = append(v.Depend.ChildDependencies, &DependencyTree{
+					Id:                field.FullPackageType(),
+					Name:              field.Name,
+					ChildDependencies: []*DependencyTree{},
+				})
+			}
 		})
 	}
 }

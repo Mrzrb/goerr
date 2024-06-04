@@ -46,7 +46,7 @@ func NewStruct(n annotation.Node) *Struct {
 			Name:           "",
 			Type:           "",
 			Raw:            nil,
-			Package:        "",
+			Package:        n.Meta().PackageName(),
 		},
 		Field: []Field{},
 	}
@@ -63,7 +63,7 @@ func NewStruct(n annotation.Node) *Struct {
 				Type:           t,
 				Raw:            f,
 				IsPointer:      isPointer,
-				Package:        "",
+				Package:        n.Meta().PackageName(),
 			},
 			Package:         "",
 			Alias:           "",

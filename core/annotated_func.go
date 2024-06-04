@@ -88,6 +88,11 @@ func NewFunc(n annotation.Node) *Func {
 		}
 		p.Name, p.Type, p.Annotation, p.IsPointer = fc.extractField(f)
 		p.Raw = f
+		if p.IsFromAnotherPkg() {
+			_, p.Package, _ = findFieldPackage(p.Type, n)
+		} else {
+			p.Package = n.Meta().PackageName()
+		}
 		fc.Retern = append(fc.Retern, p)
 	})
 

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Mrzrb/goerr/utils"
+	"github.com/Mrzrb/goerr/utils/stream"
 )
 
 // @Mock
@@ -155,8 +156,9 @@ func (a *assembler) Assmble(o outputer) []byte {
 		if imp == nil {
 			panic(pkg)
 		}
+
 		ret = append(ret, utils.Must(ExecuteTemplate(imp, map[string]any{
-			"Import": utils.Uniq(o.Imports(), func(t string) string { return t }),
+			"Import": stream.OfSlice(o.Imports()).Filter(stream.NonNil[string]()).Filter(stream.Distinct[string]()).ToSlice(),
 		}))...)
 	}
 	return ret

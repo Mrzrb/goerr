@@ -60,6 +60,22 @@ type Ident struct {
 	Package   string
 }
 
+func (t *Ident) IsFromAnotherPkg() bool {
+	return len(strings.Split(t.Type, ".")) > 1
+}
+
+func (t *Ident) PureType() string {
+	return strings.Trim(t.Type, "*")
+}
+
+func (t *Ident) FullPackageType() string {
+	if t.IsFromAnotherPkg() {
+		return t.PureType()
+	}
+
+	return t.Package + "." + t.PureType()
+}
+
 func (i *Ident) Id(node annotation.Node) string {
 	_, importPath, _ := findFieldPackage(i.Type, node)
 	return fmt.Sprintf("%s.%s", importPath, strings.ReplaceAll(i.Type, "*", ""))

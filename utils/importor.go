@@ -121,6 +121,9 @@ func GetPkgWithFullPath(m annotation.Meta) string {
 	rootDir := m.Root()
 	dir := m.Dir()
 	relative, _ := filepath.Rel(rootDir, dir)
+	if relative == "." {
+		return ""
+	}
 	pkgInfo := GetFullPackage(dir)
 	return pkgInfo.Module.Path + "/" + relative
 }
