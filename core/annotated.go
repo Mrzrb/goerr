@@ -10,6 +10,16 @@ import (
 	annotation "github.com/YReshetko/go-annotation/pkg"
 )
 
+var (
+	_ Identity = (*Struct)(nil)
+	_ Identity = (*Method)(nil)
+	_ Identity = (*Func)(nil)
+	_ Identity = (*Field)(nil)
+
+	_ Callable = (*Method)(nil)
+	_ Callable = (*Func)(nil)
+)
+
 type Identity interface {
 	Id() string
 }
@@ -99,7 +109,10 @@ func Cast[T Annotated](n Annotated) (T, bool) {
 }
 
 func Parse(node annotation.Node) Annotated {
-	if _, ok := annotation.CastNode[*ast.TypeSpec](node); ok {
+	if n, ok := annotation.CastNode[*ast.TypeSpec](node); ok {
+		if _, ok := n.Type.(*ast.InterfaceType); ok {
+			return NewInterface(node)
+		}
 		return NewStruct(node)
 	}
 	if n, ok := annotation.CastNode[*ast.FuncDecl](node); ok {
